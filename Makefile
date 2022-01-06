@@ -1,8 +1,8 @@
-INLCLUDE=./include/
-SRC=./src/*.cpp
+INLCLUDES=-I./v2/include/ -I./v2/include/parser/ -I./v2/include/types/
+SRC=v2/src/*.cpp v2/src/*/*.cpp
 
 build:
-	g++ -g -I$(INLCLUDE) -Wall -o jolly jolly.cpp src/*.cpp
+	g++ -g $(INLCLUDES) -Wall -o jolly jolly.cpp $(SRC)
 
 test:
 	make build

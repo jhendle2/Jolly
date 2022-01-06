@@ -1,5 +1,15 @@
 #include "constants.hpp"
 
+bool isObjectType(std::string s){
+    return (s=="String" ||
+        s=="Number" ||
+        s=="Boolean" ||
+        s=="Bool" ||
+        s=="Character" ||
+        s=="Nothing"
+        );
+}
+
 bool isDigit(char d){
     switch(d){
         default:
@@ -52,7 +62,7 @@ bool isNothing(std::string s){
     return s=="Nothing";
 }
 
-enum Type getTypeFromConstant(std::string str){
+enum ObjectType getTypeFromConstant(std::string str){
 
     if(isNumber(str))
         return TYPE_NUMBER;
@@ -68,7 +78,7 @@ enum Type getTypeFromConstant(std::string str){
     return TYPE_INVALID;
 }
 
-enum Type getTypeFromString(std::string str){
+enum ObjectType getTypeFromString(std::string str){
     
     if(str == "Number")
         return TYPE_NUMBER;
@@ -76,7 +86,7 @@ enum Type getTypeFromString(std::string str){
         return TYPE_STRING;
     else if(str == "Char")
         return TYPE_CHAR;
-    else if(str == "Bool")
+    else if(str == "Bool" || str == "Boolean")
         return TYPE_BOOL;
     else if(str == "Nothing")
         return TYPE_NOTHING;
@@ -84,7 +94,7 @@ enum Type getTypeFromString(std::string str){
     return TYPE_INVALID;
 }
 
-std::string typeToString(enum Type type){
+std::string typeToString(enum ObjectType type){
     switch(type){
         case TYPE_NOTHING:
             return "Nothing";

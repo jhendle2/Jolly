@@ -6,8 +6,9 @@
 #include <string>
 
 #include "variable.hpp"
-
-Variable evaluateExpression(std::vector<std::string> tokens);
+#include "object_table.hpp"
 
 bool isOperator(std::string op);
 bool isDelimiter(char c);
+
+Variable evaluateExpression(ObjectTable<Variable>& vt, std::vector<std::string> tokens);

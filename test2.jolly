@@ -1,13 +1,11 @@
-Number number1 = 5
-Number number2 = 6
-Number number3 = number1 + number2
-Number number4 = number3
-
-String s = "Hello,"
-String t = " World"
-String st = s + t
-
-Print("number4 = ")
-Println(number4)
-Print("st = ")
-Println(st)
+Number a = 5
+Number b = 10
+Number c = a + b
+c += a
+String s = "Hello"
+s += " "
+s += "Goodbye"
+s += 4
+Bool b1 = True
+Bool b2 = False
+Bool b3 = b1 + b2

@@ -2,7 +2,7 @@
 
 #include <string>
 
-enum Type{
+enum ObjectType{
     TYPE_NOTHING,
 
     TYPE_NUMBER,
@@ -10,9 +10,12 @@ enum Type{
     TYPE_BOOL,
     TYPE_STRING,
     TYPE_OBJECT,
+    TYPE_FUNCTION,
 
     TYPE_INVALID,
 };
+
+bool isObjectType(std::string s);
 
 bool isDigit(char d);
 bool isString(std::string s);
@@ -21,7 +24,7 @@ bool isNumber(std::string s);
 bool isBool(std::string s);
 bool isNothing(std::string s);
 
-enum Type getTypeFromConstant(std::string str);
-enum Type getTypeFromString(std::string str);
+enum ObjectType getTypeFromConstant(std::string str);
+enum ObjectType getTypeFromString(std::string str);
 
-std::string typeToString(enum Type type);
+std::string typeToString(enum ObjectType type);
