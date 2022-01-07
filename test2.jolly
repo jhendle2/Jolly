@@ -1,10 +1,27 @@
 Number a = 5
 
 function func1
-    Bool innerBool = True
 
-    function func2
-        Bool evenInnererBool = False
-    end func2
+    Number x = 1024
+    Bool b = True
+    if True
+        if True
+            b = False
+        end if
+    end if
+
+    Println(a)
+    Println(x)
+    Println(b)
 
 end func1
+
+function func2
+    String s = "Hello, World"
+    Character z = '!'
+    s += z
+    Println(s)
+end func2
+
+a += 2
+Println(a)

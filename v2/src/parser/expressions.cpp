@@ -69,6 +69,7 @@ bool isDelimiter(char c){
     );
 }
 
+// Yields the precendence an operation has
 int precendence(std::string op){
     if(prio.count(op) > 0)
         return prio.at(op);
@@ -76,16 +77,22 @@ int precendence(std::string op){
         ERROROUT(SyntaxErrorBadOperator, op);
 }
 
-Variable applyOp(Function* scope, Variable a, Variable b, std::string op){
-    std::cout<<"Applying Op ["<<op<<"] to "<<a.toString()<<" and "<<b.toString()<<" => ";
+// Applies an operation between two variables a and b
+// and updates the definition of the left operand
+// within the scope's variable lookup table
+// (OR)
+// generates a new variable from the operation
+// and adds it to the scope's variable lookup table
+Variable applyOp(Scope* scope, Variable a, Variable b, std::string op){
+    // std::cout<<"Applying Op ["<<op<<"] to "<<a.toString()<<" and "<<b.toString()<<" => ";
 
     enum ObjectType a_type = a.getType(), b_type = b.getType();
-    std::cout<<"a_type="<<typeToString(a.getType())<<" b_type="<<typeToString(b.getType())<<"\n";
+    // std::cout<<"a_type="<<typeToString(a.getType())<<" b_type="<<typeToString(b.getType())<<"\n";
     bool same_types = (a_type==b_type);
 
     if(same_types && op == "="){
         a.eq(b);
-        scope->updateVariable(a);
+        scope->updateVariableRecursive(a);
         return a;
     }
 
@@ -93,8 +100,8 @@ Variable applyOp(Function* scope, Variable a, Variable b, std::string op){
         Number an = Number(a);
         if(b_type == TYPE_NUMBER || b_type == TYPE_CHAR){
             Number bn = Number(b);
-            if(op=="+=") return scope->updateVariableAndGet(an.addEq(bn));
-            else if(op=="+") return scope->updateVariableAndGet(an.add(bn));
+            if(op=="+=") return scope->updateVariableAndGetRecursive(an.addEq(bn));
+            else if(op=="+") return scope->updateVariableAndGetRecursive(an.add(bn));
         }
         return an;
     }
@@ -103,16 +110,16 @@ Variable applyOp(Function* scope, Variable a, Variable b, std::string op){
         Character an = Character(a);
         if(b_type == TYPE_CHAR || b_type == TYPE_NUMBER){
             Character bn = Character(b);
-            if(op=="+=") return scope->updateVariableAndGet(an.addEq(bn));
-            else if(op=="+") return scope->updateVariableAndGet(an.add(bn));
+            if(op=="+=") return scope->updateVariableAndGetRecursive(an.addEq(bn));
+            else if(op=="+") return scope->updateVariableAndGetRecursive(an.add(bn));
         }
         return an;
     }
 
     else if(a_type == TYPE_STRING){
         String an = String(a);
-        if(op=="+=") return scope->updateVariableAndGet(an.addEq(b));
-        else if(op=="+") return scope->updateVariableAndGet(an.add(b));
+        if(op=="+=") return scope->updateVariableAndGetRecursive(an.addEq(b));
+        else if(op=="+") return scope->updateVariableAndGetRecursive(an.add(b));
         return an;
     }
 
@@ -120,8 +127,8 @@ Variable applyOp(Function* scope, Variable a, Variable b, std::string op){
         Boolean an = Boolean(a);
         if(b_type == TYPE_BOOL){
             Boolean bn = Boolean(b);
-            if(op=="+=") return scope->updateVariableAndGet(an.addEq(bn));
-            else if(op=="+") return scope->updateVariableAndGet(an.add(bn));
+            if(op=="+=") return scope->updateVariableAndGetRecursive(an.addEq(bn));
+            else if(op=="+") return scope->updateVariableAndGetRecursive(an.add(bn));
         }
         return an;
     }
@@ -129,12 +136,17 @@ Variable applyOp(Function* scope, Variable a, Variable b, std::string op){
     return Variable();
 }
 
-Variable evaluateExpression(Function* scope, std::vector<std::string> tokens){
+// Evaluates an expression of tokens by
+// setting variables in the scope's variable lookup table to constants
+// or applying operations between known variables and/or constants
+// Uses a stack to keep track of operators and operands
+// Allows for support of parenthesis to enforce order of operations
+Variable evaluateExpression(Scope* scope, std::vector<std::string> tokens){
     std::stack<Variable> values;
     std::stack<std::string> operators;
 
     for(int i = 0; i<(int)tokens.size(); i++){
-        std::cout<<"Token=<"<<tokens[i]<<">\n";
+        //std::cout<<"Token=<"<<tokens[i]<<">\n";
 
         if(tokens[i] ==  "") continue;
 
@@ -143,7 +155,7 @@ Variable evaluateExpression(Function* scope, std::vector<std::string> tokens){
         }
 
         else if(isNumber(tokens[i])){
-            std::cout<<tokens[i]<<" is number\n";
+            // std::cout<<tokens[i]<<" is number\n";
             Number number(tokens[i]);
             number.setName("constant");
             values.push(number);
@@ -159,6 +171,14 @@ Variable evaluateExpression(Function* scope, std::vector<std::string> tokens){
             Boolean b(tokens[i]);
             b.setName("constant");
             values.push(b);
+        }
+
+        else if(isChar(tokens[i])){
+            std::cout<<"Character with "<<tokens[i]<<"\n";
+            Character c(tokens[i]);
+            c.setName("constant");
+            std::cout<<"--"<<c.toString()<<"\n";
+            values.push(c);
         }
 
         else if(tokens[i] == ")"){

@@ -1,6 +1,7 @@
 #pragma once
 
 #include <unordered_map>
+#include <iostream>
 
 #include "object.hpp"
 
@@ -34,7 +35,7 @@ class ObjectTable{
             table[name_string] = obj;
         }
 
-        TableType get(std::string name){
+        TableType& get(std::string name){
             return table[name];
         }
 
@@ -47,15 +48,15 @@ class ObjectTable{
             table[name] = obj;
         }
 
-        TableType updateAndGet(TableType obj){
+        TableType& updateAndGet(TableType obj){
             table[obj.getName()] = obj;
-            return obj;
+            return table[obj.getName()];
         }
 
-        TableType updateAndGet(std::string name, TableType obj){
+        TableType& updateAndGet(std::string name, TableType obj){
             obj.setName(name);
             table[name] = obj;
-            return obj;
+            return table[name];
         }
 
         void dump(){

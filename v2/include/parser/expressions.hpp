@@ -12,5 +12,4 @@
 bool isOperator(std::string op);
 bool isDelimiter(char c);
 
-// Variable evaluateExpression(ObjectTable<Variable>& vt, std::vector<std::string> tokens);
-Variable evaluateExpression(Function* scope, std::vector<std::string> tokens);
+Variable evaluateExpression(Scope* scope, std::vector<std::string> tokens);

@@ -82,9 +82,9 @@ enum ObjectType getTypeFromString(std::string str){
     
     if(str == "Number")
         return TYPE_NUMBER;
-    else if(str == "String")
+    else if(str == "String" || str == "Word")
         return TYPE_STRING;
-    else if(str == "Char")
+    else if(str == "Char" || str == "Character")
         return TYPE_CHAR;
     else if(str == "Bool" || str == "Boolean")
         return TYPE_BOOL;

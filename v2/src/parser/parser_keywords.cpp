@@ -2,7 +2,10 @@
 
 std::unordered_map<std::string, enum ReservedKeyword> ParserReservedWords = {
     {"function", RESERVED_FUNCTION},
-    {"end", RESERVED_END}
+    {"end", RESERVED_END},
+    {"if", RESERVED_IF},
+    {"else", RESERVED_ELSE},
+    {"elsif", RESERVED_ELSIF},
 };
 
 bool isReservedKeyword(std::string word){

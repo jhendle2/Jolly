@@ -7,6 +7,8 @@ class Character : public Variable{
         Character();
         Character(const char);
         Character(const int);
+        Character(const char*);
+        Character(const std::string);
         Character(const Variable&);
 
         Character add(const Character& right);
