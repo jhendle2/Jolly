@@ -154,8 +154,12 @@ int main(int argc, char** argv){
         std::cout<< line <<"\n";
     }
 
-    ObjectTable<Variable> gvt;
+    // Function func1 = Function("func1");
+    // Function func2 = Function("func2");
+    // addFunctionToFunction(func1, func2);
+    Function mainScope = Function("mainScope");
 
+    Function* current_scope = new Function("mainScope");
     for(std::string line : file_as_lines){
         std::vector<std::string> lineAsTokens = tokenizeLine(line);
         for(std::string token : lineAsTokens){
@@ -163,11 +167,18 @@ int main(int argc, char** argv){
         }
         std::cout<<"\n";
         
-        buildVariableAndEvaluateExpressions(gvt, lineAsTokens);
-        gvt.dump();
+        current_scope = buildVariableAndEvaluateExpressions(current_scope, lineAsTokens);
+        std::cout<<"$$$$$$$$$$$$$$$$$$$$$$$$$"<<current_scope->getName()<<"\n";
     }
 
-    gvt.dump();
-    std::cout<<"\n";
+    // func1.dump();
+    // func2.dump();
+    std::cout<<"\n\n\n";
+    current_scope->dumpRecursive();
+    // Variable temp = Variable();
+    // bool has_var_a = current_scope->getFunction("func1").getVariableRecursive("a", temp);
+    // std::cout<<"Has_var_a="<<has_var_a<<"\n";
+    // if(has_var_a) std::cout<<"a="<<temp.toString()<<"\n";
+    // std::cout<<"\n";
     return 0;
 }

@@ -1,11 +1,10 @@
 Number a = 5
-Number b = 10
-Number c = a + b
-c += a
-String s = "Hello"
-s += " "
-s += "Goodbye"
-s += 4
-Bool b1 = True
-Bool b2 = False
-Bool b3 = b1 + b2
+
+function func1
+    Bool innerBool = True
+
+    function func2
+        Bool evenInnererBool = False
+    end func2
+
+end func1

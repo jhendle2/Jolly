@@ -10,6 +10,7 @@ enum ObjectType{
     TYPE_BOOL,
     TYPE_STRING,
     TYPE_OBJECT,
+    TYPE_VARIABLE,
     TYPE_FUNCTION,
 
     TYPE_INVALID,

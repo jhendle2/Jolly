@@ -8,6 +8,10 @@ Number::Number(const int number) : Variable(number){
 
 }
 
+Number::Number(const char number) : Variable((int)number){
+
+}
+
 Number::Number(std::string string) : Variable(TYPE_NUMBER){
     number = atoi(string.c_str());
 }
@@ -26,6 +30,19 @@ Number Number::add(const Number& right){
 Number Number::addEq(const Number& right){
     Number out = Number(number);
     out.number += right.number;
+    number = out.number;
+    return out;
+}
+
+Number Number::sub(const Number& right){
+    Number out = Number(number);
+    out.number -= right.number;
+    return out;
+}
+
+Number Number::subEq(const Number& right){
+    Number out = Number(number);
+    out.number -= right.number;
     number = out.number;
     return out;
 }

@@ -3,7 +3,6 @@
 #include <unordered_map>
 
 #include "object.hpp"
-#include "variable.hpp"
 
 template <typename TableType = Object>
 class ObjectTable{
@@ -60,13 +59,13 @@ class ObjectTable{
         }
 
         void dump(){
-            std::cout<<"\n\n########BEGIN OBJECT_TABLE#########\n";
+            // std::cout<<"\n\n########BEGIN OBJECT_TABLE#########\n";
             for(auto pair : table){
                 std::cout<<"* ";
                 pair.second.dump();
                 std::cout<<"\n";
             }
-            std::cout<<"\n\n########END OBJECT_TABLE#########\n";
+            // std::cout<<"\n\n########END OBJECT_TABLE#########\n";
         }
 
         bool isKnown(std::string name){

@@ -70,41 +70,49 @@ bool isDelimiter(char c){
 }
 
 int precendence(std::string op){
-    // std::cout<<"precendence\n";
     if(prio.count(op) > 0)
         return prio.at(op);
     else
         ERROROUT(SyntaxErrorBadOperator, op);
 }
 
-Variable applyOp(ObjectTable<Variable>& vt, Variable a, Variable b, std::string op){
+Variable applyOp(Function* scope, Variable a, Variable b, std::string op){
     std::cout<<"Applying Op ["<<op<<"] to "<<a.toString()<<" and "<<b.toString()<<" => ";
-    // std::cout<<"Types are equal: "<<((a.getType()==b.getType())?"True":"False")<<"\n";
 
     enum ObjectType a_type = a.getType(), b_type = b.getType();
-    std::cout<<"a_type="<<typeToString(a.getType())<<"b_type="<<typeToString(b.getType())<<"\n";
+    std::cout<<"a_type="<<typeToString(a.getType())<<" b_type="<<typeToString(b.getType())<<"\n";
     bool same_types = (a_type==b_type);
 
     if(same_types && op == "="){
         a.eq(b);
-        vt.update(a);
+        scope->updateVariable(a);
         return a;
     }
 
     if(a_type == TYPE_NUMBER){
         Number an = Number(a);
-        if(b_type == TYPE_NUMBER){
+        if(b_type == TYPE_NUMBER || b_type == TYPE_CHAR){
             Number bn = Number(b);
-            if(op=="+=") return vt.updateAndGet(an.addEq(bn));
-            else if(op=="+") return vt.updateAndGet(an.add(bn));
+            if(op=="+=") return scope->updateVariableAndGet(an.addEq(bn));
+            else if(op=="+") return scope->updateVariableAndGet(an.add(bn));
+        }
+        return an;
+    }
+
+    else if(a_type == TYPE_CHAR){
+        Character an = Character(a);
+        if(b_type == TYPE_CHAR || b_type == TYPE_NUMBER){
+            Character bn = Character(b);
+            if(op=="+=") return scope->updateVariableAndGet(an.addEq(bn));
+            else if(op=="+") return scope->updateVariableAndGet(an.add(bn));
         }
         return an;
     }
 
     else if(a_type == TYPE_STRING){
         String an = String(a);
-        if(op=="+=") return vt.updateAndGet(an.addEq(b));
-        else if(op=="+") return vt.updateAndGet(an.add(b));
+        if(op=="+=") return scope->updateVariableAndGet(an.addEq(b));
+        else if(op=="+") return scope->updateVariableAndGet(an.add(b));
         return an;
     }
 
@@ -112,83 +120,16 @@ Variable applyOp(ObjectTable<Variable>& vt, Variable a, Variable b, std::string 
         Boolean an = Boolean(a);
         if(b_type == TYPE_BOOL){
             Boolean bn = Boolean(b);
-            if(op=="+=") return vt.updateAndGet(an.addEq(bn));
-            else if(op=="+") return vt.updateAndGet(an.add(bn));
+            if(op=="+=") return scope->updateVariableAndGet(an.addEq(bn));
+            else if(op=="+") return scope->updateVariableAndGet(an.add(bn));
         }
         return an;
     }
 
-    // if(same_types){
-    //     std::cout<<"Same Types\n";
-    //     if(op == "="){
-    //         a.eq(b);
-    //         vt.update(a);
-    //         return a;
-    //     }
-    //     else if(op == "+=") return vt.updateAndGet(a.addEq(b));
-    //     else if(op == "+") return vt.updateAndGet(a.add(b));
-    // }
-
-    // else{
-    //     std::cout<<"Different Types\n";
-    // }
-
-    // if(a.getType() == b.getType()){
-    //     if(op=="==") return a.equality(b);
-    //     else if(op=="!=") return a.inequality(b);
-
-    //     else if(op=="="){
-    //         a.eq(b);
-    //         vt.updateVariable(a.getName(), a);
-    //         return a;
-    //     }
-
-    //     if(a.getType() == TYPE_NUMBER){
-    //         Number an(a);
-    //         Number bn(b);
-    //         if(op=="+") return an.add(bn);
-    //         else if(op=="-") return an.subtract(bn);
-    //         else if(op=="*") return an.multiply(bn);
-    //         else if(op=="/") return an.divide(bn);
-    //         else if(op=="%") return an.mod(bn);
-    //         else if(op=="^") return an.power(bn);
-
-    //         else if(op=="+=") return vt.updateVariableAndGet(an.addEq(bn));
-    //         else if(op=="-=") return vt.updateVariableAndGet(an.subtractEq(bn));
-    //         else if(op=="*=") return vt.updateVariableAndGet(an.multiplyEq(bn));
-    //         else if(op=="/=") return vt.updateVariableAndGet(an.divideEq(bn));
-    //         else if(op=="%=") return vt.updateVariableAndGet(an.modEq(bn));
-    //         else if(op=="^=") return vt.updateVariableAndGet(an.powerEq(bn));
-
-    //         else if(op=="<") return an.less(bn);
-    //         else if(op==">") return an.greater(bn);
-    //         else if(op=="<=") return an.lessEq(bn);
-    //         else if(op==">=") return an.greaterEq(bn);
-
-    //         else return an;
-    //     }
-    // }
-
-    // if(a.getType() == TYPE_STRING){
-    //     std::cout<<"herrreee\n";
-    //     String as(a);
-    //     String bs(b.toString());
-    //     // std::cout<<"TYPE_STRING WITH "<<as.toString()<<" AND "<<bs.toString()<<"\n";
-    //     if(op=="+") return as.add(bs);
-
-    //     else if(op=="+=") return vt.updateVariableAndGet(as.addEq(bs));
-    // }
-
-    // else{
-    //     std::cout<<"there\n";
-    //     std::string error_msg = a.toStringWithQuotes() + " " + op + " " + b.toStringWithQuotes(); 
-    //     ERROROUT(SyntaxErrorBadOperation,error_msg);
-    // }
-    // return a;
     return Variable();
 }
 
-Variable evaluateExpression(ObjectTable<Variable>& vt, std::vector<std::string> tokens){
+Variable evaluateExpression(Function* scope, std::vector<std::string> tokens){
     std::stack<Variable> values;
     std::stack<std::string> operators;
 
@@ -205,7 +146,6 @@ Variable evaluateExpression(ObjectTable<Variable>& vt, std::vector<std::string> 
             std::cout<<tokens[i]<<" is number\n";
             Number number(tokens[i]);
             number.setName("constant");
-            // std::cout<<"Found number: "<<tokens[i]<<"\n";
             values.push(number);
         }
 
@@ -232,8 +172,8 @@ Variable evaluateExpression(ObjectTable<Variable>& vt, std::vector<std::string> 
                 std::string op = operators.top();
                 operators.pop();
 
-                Variable result = applyOp(vt, val1, val2, op);
-                // std::cout<<"Result="<<result.toString()<<"\n";
+                Variable result = applyOp(scope, val1, val2, op);
+
                 values.push(result);
             }
 
@@ -254,19 +194,20 @@ Variable evaluateExpression(ObjectTable<Variable>& vt, std::vector<std::string> 
                     std::string op = operators.top();
                     operators.pop();
 
-                    Variable result = applyOp(vt, val1, val2, op);
-                    // std::cout<<"Result="<<result.toString()<<"\n";
+                    Variable result = applyOp(scope, val1, val2, op);
+
                     values.push(result);
 
                 }
 
-                // std::cout<<"Pushed: "<<tokens[i]<<"\n";
                 operators.push(tokens[i]);
             }
 
             else{
-                Variable lookedUpVariable = vt.get(tokens[i]);
-                values.push(lookedUpVariable);
+                Variable looked_up_variable = Variable();
+                bool has_variable = scope->getVariableRecursive(tokens[i], looked_up_variable);
+                if(has_variable) values.push(looked_up_variable);
+                else ERROROUT(SyntaxErrorUnrecognizedVariable, tokens[i]);
             }
             
         }
@@ -282,8 +223,8 @@ Variable evaluateExpression(ObjectTable<Variable>& vt, std::vector<std::string> 
         std::string op = operators.top();
         operators.pop();
 
-        Variable result = applyOp(vt, val1, val2, op);
-        // std::cout<<"Result="<<result.toString()<<"\n";
+        Variable result = applyOp(scope, val1, val2, op);
+
         values.push(result);
     }
 

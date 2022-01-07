@@ -1,6 +1,7 @@
 #pragma once
 
 #include <vector>
+#include <unordered_map>
 
 #include "object.hpp"
 #include "variable.hpp"
@@ -37,10 +38,12 @@ class BaseFunction : public Object{
 class Function : public BaseFunction{
     private:
         ObjectTable<Variable> variables;
+        Function* parent;
+        std::unordered_map<std::string, Function*> functions;
 
     public:
         Function();
-        ~Function();
+        virtual ~Function();
 
         Function(std::string name);
         Function(std::string name, enum ObjectType return_type);
@@ -59,14 +62,47 @@ class Function : public BaseFunction{
         void evaluateInner();
 
         void dump();
-        void dumpVariables();
+        void dumpRecursive();
+
+        void setParent(Function* parent);
+        Function* getParent();
+        bool hasParent();
 
     //protected:
+    
+        /*****************************************/
+        ObjectTable<Variable>& getVariables();
+
         void addVariable(Variable var);
+        void addVariable(std::string name, Variable var);
         void addVariable(enum AccessSpecifier access_specifier, Variable var);
+        void addVariable(std::string name, enum AccessSpecifier access_specifier, Variable var);
 
         // void updateVariable(Variable var, const Variable& value);
+        void updateVariable(Variable var);
         void updateVariable(std::string name, Variable value);
+        Variable updateVariableAndGet(Variable var);
 
         Variable getVariable(std::string name);
+        bool getVariableRecursive(std::string name, Variable& var);
+
+        /*****************************************/
+        void addFunction(Function func);
+        void addFunction(Function* func);
+        void addFunction(enum AccessSpecifier access_specifier, Function func);
+        void addFunction(enum AccessSpecifier access_specifier, Function* func);
+
+        Function* getFunction(std::string name);
+        bool hasFunction(std::string name);
+
+        void updateFunction(std::string name, Function func);
+        Function* updateAndGetFunction(std::string name, Function func);
+
+        /*****************************************/
+        bool isKnown(std::string name); // Do I have this variable or function?
+        bool isKnownVariable(std::string name);
+        enum ObjectType isKnownAndType(std::string name); // Do I have this variable or function? If yes --> return TYPE_VARIABLE or TYPE_FUNCTION. If not, TYPE_INVALID
 };
+
+void addFunctionToFunction(Function& parent, Function& child);
+void addFunctionToFunction(Function* parent, Function* child);

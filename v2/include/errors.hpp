@@ -10,6 +10,7 @@
 #define SyntaxErrorUnrecognizedVariable "\n[SyntaxError - Unrecognized Variable] Not a known variable. Did you initialize it?:\t"
 #define SyntaxErrorUnrecognizedFunction "\n[SyntaxError - Unrecognized Function] Not a known function. Did you define it?:\t"
 #define SyntaxErrorUnrecognizedObject "\n[SyntaxError - Unrecognized Object] Not a known object (function, variable). Did you define it?:\t"
+#define SyntaxErrorUnrecognizedKeyword "\n[SyntaxError - Unrecognized Keyword] Not a recognized keyword:\t"
 #define SyntaxErrorReinitializedVariable "\n[SyntaxError - Reinitialized Variable] Variable was reinitialized twice!:\t"
 
 /* Arithmetic Errors */
@@ -17,6 +18,7 @@
 
 /* Parse Errors (My fault usually) */
 #define ParseErrorUnrecognizedVariable "\n[Parse Error - Unrecognized Variable] Parser encountered an empty variable name:\t"
+#define ParseErrorUnmatchedEnd "\n[Parse Error - Unmatched {end}] {end} with no matching open keyword:\t"
 
 #define ParseDebugNoTokens "\n[Parse Debug - No Tokens]\t"
 #define ParseDebugOneToken "\n[Parse Debug - One Token]\t"
