@@ -26,6 +26,7 @@ class Scope : public Object{
     protected:
         int last_scope_index;
         enum ScopeType scope_type;
+        bool is_main_scope;
 
         Scope* parent;
         Scope* next_scope;
@@ -39,6 +40,8 @@ class Scope : public Object{
         Scope(std::string, enum ScopeType);
         virtual ~Scope();
 
+        void setMainScope();
+
         void setScopeType(enum ScopeType);
         enum ScopeType getScopeType();
 
@@ -49,7 +52,7 @@ class Scope : public Object{
 
         void setParameter(std::string name, Object value);
 
-        void evaluateInner();
+        // virtual void evaluate();
 
         virtual void dump();
         void dumpRecursive();
@@ -90,10 +93,14 @@ class Scope : public Object{
         void addScope(enum AccessSpecifier access_specifier, Scope* scope);
 
         Scope* getScope(std::string name);
+        bool getScopeRecursive(std::string name, Scope* scope);
         bool hasScope(std::string name);
+        bool hasScopeRecursive(std::string name);
 
         void updateScope(std::string name, Scope scope);
+        void updateScopeRecursive(std::string name, Scope scope);
         Scope* updateAndGetScope(std::string name, Scope scope);
+        Scope* updateAndGetScopeRecursive(std::string name, Scope scope);
 
         int lastScopeIndex();
 

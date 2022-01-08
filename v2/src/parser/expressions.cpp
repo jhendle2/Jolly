@@ -74,7 +74,8 @@ int precendence(std::string op){
     if(prio.count(op) > 0)
         return prio.at(op);
     else
-        ERROROUT(SyntaxErrorBadOperator, op);
+        return prio.at("+");
+        // ERROROUT(SyntaxErrorBadOperator, op);
 }
 
 // Applies an operation between two variables a and b
@@ -226,8 +227,21 @@ Variable evaluateExpression(Scope* scope, std::vector<std::string> tokens){
             else{
                 Variable looked_up_variable = Variable();
                 bool has_variable = scope->getVariableRecursive(tokens[i], looked_up_variable);
-                if(has_variable) values.push(looked_up_variable);
-                else ERROROUT(SyntaxErrorUnrecognizedVariable, tokens[i]);
+                if(has_variable){
+                    values.push(looked_up_variable);
+                    continue;
+                }
+
+                Function* looked_up_function;
+                bool has_function = scope->getScopeRecursive(tokens[i], looked_up_function);
+                if(has_function){
+                    Variable returned_variable = returnFunction(looked_up_function);
+                    values.push(looked_up_function);
+                    continue;
+                }
+
+                SAFEERROROUT(scope, SyntaxErrorUnrecognizedObject, tokens[i]);
+                // else SAFEERROROUT(scope, SyntaxErrorUnrecognizedVariable, tokens[i]);
             }
             
         }

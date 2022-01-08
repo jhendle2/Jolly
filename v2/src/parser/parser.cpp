@@ -9,6 +9,7 @@
 #include "parser.hpp"
 #include "parser_keywords.hpp"
 #include "expressions.hpp"
+#include "function.hpp"
 
 #include "variable.hpp"
 #include "object_table.hpp"
@@ -33,13 +34,12 @@ ConditionalScope* initializeConditionalScope(Scope* parent, std::vector<std::str
     return new_condition;
 }
 
-// Creates a new function and links it to its parent scope
-Function* initializeFunction(Scope* parent, std::vector<std::string> tokens){
-    std::string function_name = tokens[1];
-    Function* new_function = new Function(function_name);  
-    addScopeToScope(parent, new_function);
-    return new_function;
-}
+// Function* initializeFunction(Scope* parent, std::vector<std::string> function_header_tokens){
+//     std::string function_name = function_header_tokens[1];
+//     Function* new_function = new Function(function_name);  
+//     addScopeToScope(parent, new_function);
+//     return new_function;
+// }
 
 // Tries to close up a scope and return its parent
 // If it can't, there's PROBABLY an error and we should quit
@@ -62,17 +62,83 @@ Scope* tryAndEndScope(Scope* scope, std::vector<std::string> tokens){
 // modifies the parent scope
 Scope* initializeKeyword(Scope* parent, enum ReservedKeyword keyword_type, std::vector<std::string> tokens){
     static Scope* last_conditional_scope = nullptr;
+    // static bool currently_inside_function = false;
+    bool currently_inside_function = false;
+    if(parent->hasParent() && parent->getParent()->getScopeType() == SCOPE_FUNCTION){
+        currently_inside_function = true;
+    }
 
     if(keyword_type == RESERVED_END){
-        ///std::cout<<"#####GOING_UP\n";
+        // If we're in a function, close up the function
+
+        // TODO: remember to return Nothings!!
+        if(currently_inside_function){
+            currently_inside_function = false;
+            if(parent->hasParent()){
+                parent = parent->getParent();
+                return parent;
+            }
+            SAFEERROROUT(parent, ParseErrorUnmatchedEnd, tokensToString(tokens));
+        }
+        
+        // Otherwise, clean up the scope we're in (IF, ELSE, ELSIF, etc.)
         Scope* return_scope = tryAndEndScope(parent, tokens);
         last_conditional_scope = return_scope;
         return return_scope;
     }
+
+    // If we hit a YIELD, let's try and return from the function we're currently in
+    // and if we're not currently in a function, let's crash!
+    if(keyword_type == RESERVED_YIELD){
+
+        // Crash if we're not in a function
+        if(!currently_inside_function){
+            std::cout<<"!!NOT INSIDE FUNC\n";
+            SAFEERROROUT(parent, ParseErrorOrphanYield, tokensToString(tokens));
+        }
+
+        Variable return_variable = Variable();
+        // return_variable.setName(parent->getName() + ".return");
+
+        // // yield expression...
+        // if(tokens.size() > 2){
+        //     //lord help us
+        //     return parent;
+        // }
+
+        // yield variable
+        return_variable = evaluateExpression(parent, shiftTokens(tokens, 1));
+        return_variable.setName(parent->getName() + ".return");
+        
+        // parent->getVariableRecursive(tokens[1], return_variable);
+        if(!parent->hasParent()){ // this might be unnecessary
+            std::cout<<"!!SECOND CHECK\n";
+            SAFEERROROUT(parent, ParseErrorOrphanYield, tokensToString(tokens));
+        }
+
+        parent = parent->getParent();
+        parent->addVariable(return_variable);
+        return parent;
+    }
     
-    ///std::cout<<"#####GOING_DOWN\n";
+    // Function keyword
+    // Initialize a function
     if(keyword_type == RESERVED_FUNCTION){
-        return initializeFunction(parent, tokens);
+        if(tokens.size() == 1){
+            SAFEERROROUT(parent, ParseErrorIncompleteFunctionHeader, tokensToString(tokens));
+        }
+
+        if(currently_inside_function){
+            WARNING(ParseWarningNestedFunctions, tokensToString(tokens));
+        }
+
+        std::string function_name = tokens[1];
+        Function* new_function = new Function(function_name); // initializeFunction(parent, tokens[1]);
+
+        // new_function->addLine(tokensToLine(tokens));
+        new_function->setParent(parent);
+        currently_inside_function = true;
+        parent = new_function;
     }
 
 
@@ -93,28 +159,37 @@ Scope* initializeKeyword(Scope* parent, enum ReservedKeyword keyword_type, std::
     }
 
     if(keyword_type == RESERVED_ELSE){
-        ///std::cout<<"OH BABY WE HIT AN ELSE\n";
-        ///std::cout<<"currently_in="<<parent->getName()<<"\n";
         parent = tryAndEndScope(last_conditional_scope, tokens);
-        ///std::cout<<"now_in="<<parent->getName()<<"\n";
 
         if(last_conditional_scope != nullptr){
-            ///std::cout<<"****1\n";
             ConditionalScope* new_conditional_scope = initializeConditionalScope(parent, tokens, SCOPE_ELSE);
-            ///std::cout<<"****2\n";
             new_conditional_scope->setParent(parent);
-            ///std::cout<<"****3\n";
             parent->addNextScope(new_conditional_scope);
-            ///std::cout<<"****4\n";
             last_conditional_scope = new_conditional_scope;
-            ///std::cout<<"****5\n";
             return last_conditional_scope;
         }
         
-        ERROROUT(ParseErrorUnmatchedEnd, tokensToString(tokens));
+        SAFEERROROUT(parent, ParseErrorUnmatchedEnd, tokensToString(tokens));
     }
 
     return parent;
+}
+
+// Print(value) (AND) Print(expression) handler
+void Print(Scope* parent, std::vector<std::string> tokens){
+    Variable print_variable;
+
+    // Print(expression)
+    if(tokens.size() > 4){
+        std::vector<std::string> shifted_tokens = shiftTokens(tokens, 1);
+        print_variable = evaluateExpression(parent, shifted_tokens);
+        std::cout<<"> "<<print_variable.toStringValue();
+        return;
+    }
+
+    // Print(value)
+    bool exists = parent->getVariableRecursive(tokens[2], print_variable);
+    if(exists) std::cout<<"> "<<print_variable.toStringValue();
 }
 
 // Takes a list of tokens
@@ -127,7 +202,7 @@ Scope* buildVariableAndEvaluateExpressions(Scope* parent, std::vector<std::strin
     ///std::cout<<"#################CURRENTLY IN = "<<parent->getName()<<"\n";
     // Obvious error
     if(tokens.size() == 0)
-        ERROROUT(ParseDebugNoTokens, tokensToString(tokens));
+        SAFEERROROUT(parent, ParseDebugNoTokens, tokensToString(tokens));
     
     // Single word keywords
     if(tokens.size() == 1){
@@ -139,38 +214,37 @@ Scope* buildVariableAndEvaluateExpressions(Scope* parent, std::vector<std::strin
             return parent;
         }
         
-        ERROROUT(ParseDebugOneToken, tokensToString(tokens));
+        SAFEERROROUT(parent, ParseDebugOneToken, tokensToString(tokens));
     }
 
+    // Makes Print/Println work
     if(tokens[0]=="Print"){
-        Variable v;
-        bool exists = parent->getVariableRecursive(tokens[2], v);
-        if(exists) std::cout<<"> "<<v.toStringValue();
+        Print(parent, tokens);
         return parent;
     }
     else if(tokens[0]=="Println"){
-        Variable v;
-        bool exists = parent->getVariableRecursive(tokens[2], v);
-        if(exists) std::cout<<"> "<<v.toStringValue()<<"\n";
-        else std::cout<<"> \n";
+        Print(parent, tokens);
+        std::cout<<"\n";
         return parent;
     }
 
-    // Expressions, function calls, variables initialization, etc.
+    // If this token is a variable type, we should initialize a variable
+    // Recursively evaluates expressions as well
     bool first_token_is_type = isObjectType(tokens[0]);
     if(first_token_is_type){
-        ///std::cout<<"######################\n";
+
+        // If we accidentally re-define a defined variable
         bool second_token_is_known_variable = parent->isKnownVariable(tokens[1]);
-        ///std::cout<<"stikv="<<second_token_is_known_variable<<"\n";
         if(second_token_is_known_variable){
-            ERROROUT(SyntaxErrorReinitializedVariable, tokensToString(tokens));
+            SAFEERROROUT(parent, SyntaxErrorReinitializedVariable, tokensToString(tokens));
         }
 
+        // Clearly we didn't have a problem, so let's chug along
         std::string type_string = tokens[0];
         std::string variable_name = tokens[1];
         initializeVariable(parent, type_string, variable_name);
 
-        // if there are still tokens left
+        // If there are still tokens left, recursively evaluate the expression remaining
         if(tokens.size() > 2){
             std::vector<std::string> shifted_tokens = shiftTokens(tokens, 1);
             parent = buildVariableAndEvaluateExpressions(parent, shifted_tokens); // recurse and do it again now with var initialized
@@ -179,6 +253,7 @@ Scope* buildVariableAndEvaluateExpressions(Scope* parent, std::vector<std::strin
         return parent;
     }
 
+    // If this token is a keyword, determine which and apply the necessary operations on it
     bool first_token_is_keyword = isReservedKeyword(tokens[0]);
     if(first_token_is_keyword){
         enum ReservedKeyword keyword_type = getReservedKeyword(tokens[0]);
@@ -187,6 +262,7 @@ Scope* buildVariableAndEvaluateExpressions(Scope* parent, std::vector<std::strin
         return parent;
     }
 
+    // If we know this variable, we should assign it to an expression
     Variable temp = Variable();
     bool first_token_is_known_variable = parent->getVariableRecursive(tokens[0], temp);
     if(first_token_is_known_variable){
@@ -196,5 +272,21 @@ Scope* buildVariableAndEvaluateExpressions(Scope* parent, std::vector<std::strin
         return parent;
     }
 
+    // If we are calling a function and it is known, we should evaluate it and "return" its return variable
+    Function* temp_function = nullptr;
+    parent->dumpRecursive();
+    bool first_token_is_known_function = parent->getScopeRecursive(tokens[0], temp_function);
+    std::cout<<"("<<tokens[0]<<") ftikf="<<first_token_is_known_function<<"\n";
+    if(first_token_is_known_function){
+        // DO THE FUNCTION
+        if(temp_function==nullptr)
+            SAFEERROROUT(parent, SyntaxErrorUnrecognizedFunction,"whoopsie daisy");
+        returnFunction(temp_function);
+        // Variable return_variable = returnFunction(temp_function);
+        // parent->addVariable(return_variable);
+        return parent;
+    }
+
+    SAFEERROROUT(parent, ParseErrorUnexpectedToken, tokensToString(tokens));
     return parent;
 }

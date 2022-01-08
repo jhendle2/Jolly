@@ -5,10 +5,13 @@
 #include "color_text.hpp"
 
 #define BaseError(COLOR_CODE, ERROR_TYPE, ERROR_NAME, DESC) "\n" COLOR_CODE "[" ERROR_TYPE " - " ERROR_NAME "] " _reset DESC ":\t"
+#define BaseWarning(WARNING_NAME, DESC) BaseError(_fgBrightMagenta, "Warning", WARNING_NAME, DESC)
+#define BaseNote(DESC) "\n" _fgBrightMagenta "[ SMILE-PARSER :> ] " _reset DESC
 
 #define SyntaxError(ERROR_NAME, DESC)  BaseError(_fgBrightRed, "SyntaxError", ERROR_NAME, DESC)
 #define ParseError(ERROR_NAME, DESC)  BaseError(_fgBrightGreen, "ParseError", ERROR_NAME, DESC)
 #define ArithmeticError(ERROR_NAME, DESC)  BaseError(_fgBrightMagenta, "ArithmeticError", ERROR_NAME, DESC)
+
 
 /* Syntax Errors */
 #define SyntaxErrorBadOperator SyntaxError("Bad Operator", "Operator does not exist")
@@ -24,13 +27,31 @@
 /* Arithmetic Errors */
 #define ArithmeticErrorDivideByZero ArithmeticError("Divide By Zero", "Cannot divide by zero")
 
-/* Parse Errors (My fault usually) */
+/* Parse Errors */
 #define ParseErrorUnrecognizedVariable ParseError("Unrecognized Variable", "Parser encountered an empty variable name")
 #define ParseErrorUnmatchedEnd ParseError("Unmatched \"end\"", "\"end\" with no matching open keyword")
+#define ParseErrorUnknownWithinScope ParseError("Unknown Within Scope", "The following is unknown within this scope")
+#define ParseErrorUnexpectedToken ParseError("Unexpected Token", "The following is an unexpected token within this scope")
+#define ParseErrorIncompleteFunctionHeader ParseError("Incomplete Function Header", "Function header is missing integral tokens")
+#define ParseErrorOrphanYield ParseError("Orphan Yield", "This yield is an orphan and lacks a parent function")
 
 #define ParseDebugNoTokens "\n[Parse Debug - No Tokens]\t"
 #define ParseDebugOneToken "\n[Parse Debug - One Token]\t"
 #define ParseDebugTwoTokens "\n[Parse Debug - Two Tokens]\t"
 #define ParseDebugSeveralTokens "\n[Parse Debug - Several Tokens]\t"
+#define ParseDebugNoReturnVariableSet "\n[Parse Debug - No Variable Set]\t"
 
-#define ERROROUT(X,Y) {std::cout<<X<<Y<<"\n\n";exit(EXIT_FAILURE);}
+/* Parse Warnings (My fault usually) */
+#define ParseWarningNestedFunctions BaseWarning("Nested Functions", "This feature is not supported yet")
+
+#define WarningsEnabled true
+
+#define ERROROUT(X,Y) {std::cout<<X<<Y<<"\n\n"; exit(EXIT_FAILURE);}
+
+#define CLEANUPEVERYTHING(PARENT) cleanup_everything(PARENT)
+#define SAFEERROROUT(PARENT,X,Y) {std::cout<<X<<Y<<"\n\n"; CLEANUPEVERYTHING(PARENT); exit(EXIT_FAILURE);} // Exits but also frees all remaining scopes, vars, etc.
+#define WARNING(X,Y) {if(WarningsEnabled){std::cout<<X<<Y<<"\n\n";}} // Warning and doesn't cleanup or quit
+#define NOTE(DESC) std::cout<<BaseNote(DESC)<<"\n";
+
+#include "scope.hpp"
+void cleanup_everything(Scope* scope);

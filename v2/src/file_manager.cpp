@@ -1,6 +1,7 @@
 #include <algorithm>
 
 #include "file_manager.hpp"
+#include "general_utils.hpp"
 
 static void removeComments(std::string& in){
     int comment_index = in.find('#');
@@ -48,4 +49,49 @@ std::vector<std::string> readFileAsLines(std::string filename){
         newfile.close(); //close the file object.
     }
     return lines;   
+}
+
+// TODO: This is gonna have awful complexity so we should make it do the job of 
+// readFileAsLines() internally instead and take a filename instead of a vector of lines
+std::vector<struct readLinesStruct> readLinesAsLinesAndFunctions(std::vector<std::string> lines){
+    std::vector<struct readLinesStruct> lines_and_functions;
+    struct readLinesStruct temp_lines;
+    temp_lines.is_function = false;
+
+    for(std::string line : lines){
+        std::cout<<"ON="<<line<<"\n";
+        std::vector<std::string> line_as_tokens = tokenizeLine(line);
+        
+        std::cout<<"#lines&funcs size = "<<lines_and_functions.size()<<"\n";
+        std::cout<<"#temp lines size = "<<temp_lines.lines.size()<<"\n";
+
+        if(line_as_tokens[0] == "function"){
+            lines_and_functions.push_back(temp_lines);
+            temp_lines.function_name = line_as_tokens[1];
+            temp_lines.lines.clear();
+            temp_lines.lines.push_back(line);
+            temp_lines.is_function = true;
+        }
+
+        else if(line_as_tokens[0] == "end"){
+            std::cout<<"$$end\n";
+            temp_lines.lines.push_back(line);
+            if(line_as_tokens[1] != "if" && temp_lines.is_function){
+                lines_and_functions.push_back(temp_lines);
+                temp_lines.lines.clear();
+                temp_lines.is_function = false;
+            }
+        }
+
+        else{
+            std::cout<<"temp_lines pushing back "<<line<<"\n";
+            temp_lines.lines.push_back(line);
+        }
+    }
+
+    if(temp_lines.lines.size() > 0){
+        lines_and_functions.push_back(temp_lines);
+    }
+
+    return lines_and_functions;
 }

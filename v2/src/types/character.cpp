@@ -14,15 +14,13 @@ Character::Character(const char character) : Variable(character){
 Character::Character(const char* character) : Variable(TYPE_CHAR){
     std::string character_as_string = character;
     if(hasQuotes(character_as_string))
-        character_as_string = stripQuotes(this->string);
-    std::cout<<"cas="<<character_as_string<<"\n";
+        character_as_string = stripQuotes(character_as_string);
     this->character = character_as_string.at(0);
 }
 
 Character::Character(std::string character_as_string) : Variable(TYPE_CHAR){
     if(hasQuotes(character_as_string))
-        character_as_string = stripQuotes(this->string);
-    std::cout<<"cas="<<character_as_string<<"\n";
+        character_as_string = stripQuotes(character_as_string);
     this->character = character_as_string.at(0);
 }
 

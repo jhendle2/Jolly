@@ -1,5 +1,6 @@
 #include <iostream>
 
+#include "errors.hpp"
 #include "scope.hpp"
 
 std::string scopeTypeToString(enum ScopeType scope_type){
@@ -26,6 +27,7 @@ Scope::Scope() : Object("unnamed_scope", TYPE_SCOPE){
     this->scope_type = SCOPE_NORMAL;
     parent=nullptr;
     next_scope=nullptr;
+    is_main_scope = false;
 }
 
 Scope::Scope(enum ScopeType scope_type) : Object("unnamed_scope", TYPE_SCOPE){
@@ -33,6 +35,7 @@ Scope::Scope(enum ScopeType scope_type) : Object("unnamed_scope", TYPE_SCOPE){
     this->scope_type = scope_type;
     parent=nullptr;
     next_scope=nullptr;
+    is_main_scope = false;
 }
 
 Scope::Scope(std::string name) : Object(name, TYPE_SCOPE){
@@ -40,6 +43,7 @@ Scope::Scope(std::string name) : Object(name, TYPE_SCOPE){
     this->scope_type = SCOPE_NORMAL;
     parent=nullptr;
     next_scope=nullptr;
+    is_main_scope = false;
 }
 
 Scope::Scope(std::string name, enum ScopeType scope_type) : Object(name, TYPE_SCOPE){
@@ -47,13 +51,17 @@ Scope::Scope(std::string name, enum ScopeType scope_type) : Object(name, TYPE_SC
     this->scope_type = scope_type;
     parent=nullptr;
     next_scope=nullptr;
+    is_main_scope = false;
 }
 
 Scope::~Scope(){
     // we don't want to DELETE or FREE parent because it might have other children
     // as such, we just want to set our local parent to a nullptr just in case.
     parent=nullptr;
-    next_scope=nullptr;
+    if(next_scope != nullptr){
+        delete next_scope;
+        next_scope=nullptr;
+    }
 
     for(auto pair : scopes){
         Scope* temp = pair.second;
@@ -65,6 +73,10 @@ Scope::~Scope(){
     scopes.clear(); // dump the vector
 }
 
+void Scope::setMainScope(){
+    is_main_scope = true;
+}
+
 void Scope::setScopeType(enum ScopeType scope_type){
     this->scope_type = scope_type;
 }
@@ -72,9 +84,9 @@ enum ScopeType Scope::getScopeType(){
     return scope_type;
 }
 
-void Scope::evaluateInner(){
+// void Scope::evaluate(){
 
-}
+// }
 
 void Scope::setParent(Scope* parent){
     if(this->parent == nullptr)
@@ -179,6 +191,21 @@ bool Scope::getVariableRecursive(std::string name, Variable& var){
     return false;
 }
 
+bool Scope::getScopeRecursive(std::string name, Scope* scope){
+    std::string local_name = this->name + "." + name;
+    std::cout<<"looking for="<<local_name<<"\n";
+    if(hasScope(local_name)){
+        scope = getScope(local_name);
+        return true;
+    }
+
+    if(hasParent()){
+        return parent->getScopeRecursive(name, scope);
+    }
+
+    return false;
+}
+
 /*****************************************/
 
 void Scope::addScope(Scope scope){
@@ -211,17 +238,57 @@ void Scope::updateScope(std::string name, Scope scope){
     *(scopes[name]) = scope;
 }
 
+void Scope::updateScopeRecursive(std::string name, Scope scope){
+    if(hasScope(name)){
+        *(scopes[name]) = scope;
+        return;
+    }
+
+    if(hasParent()){
+        parent->updateScopeRecursive(name, scope);
+    }
+}
+
 bool Scope::hasScope(std::string name){
     return (scopes.count(name) > 0);
 }
 
+bool Scope::hasScopeRecursive(std::string name){
+    if(parent != nullptr){
+        if(hasScope(name)) return true;
+        else return hasScopeRecursive(name);
+    }
+    return false;
+}
+
 Scope* Scope::getScope(std::string name){
+    std::cout<<"getScope("<<name<<")\n";
+    dumpRecursive();
     return scopes[name];
 }
 
 Scope* Scope::updateAndGetScope(std::string name, Scope scope){
-    updateScope(name, scope);
-    return getScope(name);
+    if(hasScope(name)){
+        updateScope(name, scope);
+        return getScope(name);
+    }
+
+    ERROROUT(ParseErrorUnknownWithinScope, name);
+    return new Scope();
+}
+
+Scope* Scope::updateAndGetScopeRecursive(std::string name, Scope scope){
+    if(hasScope(name)){
+        updateScope(name, scope);
+        return getScope(name);
+    }
+
+    if(hasParent()){
+        return parent->updateAndGetScopeRecursive(name, scope);
+    }
+    
+    ERROROUT(ParseErrorUnknownWithinScope, name);
+    return new Scope();
 }
 
 int Scope::lastScopeIndex(){
@@ -268,7 +335,6 @@ bool Scope::isKnown(std::string name){
 bool Scope::isKnownVariable(std::string name){
     return variables.isKnown(name);
 }
-
 
 void Scope::addNextScope(Scope* next_scope){
     if(this->next_scope == nullptr){

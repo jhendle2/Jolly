@@ -1,6 +1,14 @@
 #include "general_utils.hpp"
 #include "expressions.hpp"
 
+std::string dropFileExtension(std::string filename){
+    int dot_index = (int)filename.find('.');
+    if(dot_index >= 0){
+        return filename.substr(0,dot_index-1);
+    }
+    return filename;
+}
+
 bool hasQuotes(std::string s){
     return (
         s.length() > 2 &&
@@ -13,10 +21,12 @@ bool hasQuotes(std::string s){
 
 std::string stripQuotes(std::string s){
     if(s.length() >= 3){
-        if(s.at(0)=='\"' && s.at(s.length()-1)=='\"')
+        if(s.at(0)=='\"' && s.at(s.length()-1)=='\"'){
             return s.substr(1,s.length()-2);
-        else if(s.at(0)=='\'' && s.at(s.length()-1)=='\'')
+        }
+        else if(s.at(0)=='\'' && s.at(s.length()-1)=='\''){
             return s.substr(1,s.length()-2);
+        }
     }
     return s;
 }
@@ -32,6 +42,12 @@ std::vector<std::string> shiftTokens(std::vector<std::string> tokens, int shift)
 }
 
 std::string tokensToString(std::vector<std::string> tokens){
+    std::string tokensAsString = "";
+    for(std::string token : tokens) tokensAsString += token + " ";
+    return tokensAsString;
+}
+
+std::string tokensToLine(std::vector<std::string> tokens){
     std::string tokensAsString = "";
     for(std::string token : tokens) tokensAsString += token + " ";
     return tokensAsString;
