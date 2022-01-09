@@ -1,8 +1,9 @@
 #include "general_utils.hpp"
 #include "conditional_scope.hpp"
 
-ConditionalScope::ConditionalScope(enum ScopeType scope_type, int id) : Scope(scope_type){
+ConditionalScope::ConditionalScope(enum ScopeType scope_type, int id, bool truthiness) : Scope(scope_type){
     next_conditional_scope = nullptr;
+    this->truthiness = truthiness;
     name = scopeTypeToString(scope_type) + "." + std::to_string(id);
 }
 

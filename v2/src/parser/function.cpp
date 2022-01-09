@@ -6,12 +6,14 @@
 Function::Function() : Scope("unnamed_function", SCOPE_FUNCTION){
     this->return_type = TYPE_NOTHING;
     this->return_variable = Variable(TYPE_NOTHING);
+    this->has_been_evaluated = false;
     function_scope = nullptr;
 }
 
 Function::Function(std::string name) : Scope(name, SCOPE_FUNCTION){
     this->return_type = TYPE_NOTHING;
     this->return_variable = Variable(TYPE_NOTHING);
+    this->has_been_evaluated = false;
     function_scope = nullptr;
 }
 
@@ -19,6 +21,7 @@ Function::Function(std::string name, enum ObjectType return_type) : Scope(name, 
     this->name = name;
     this->return_type = return_type;
     this->return_variable = Variable(return_type);
+    this->has_been_evaluated = false;
     function_scope = nullptr;
 }
 
@@ -71,7 +74,6 @@ int Function::numLines(){
     return lines.size();
 }
 void Function::addLine(std::string line){
-    std::cout<<"ADDINGLINE="<<line<<"\n";
     lines.push_back(line);
 }
 void Function::popLine(int index){
@@ -88,19 +90,34 @@ std::vector<std::string> Function::getLines(){
 }
 
 void Function::addParameter(Object param){
-    params[param.getName()] = param;
+    params.push_back(param);
 }
 
 void Function::addParameter(std::string name, Object value){
-    params[name] = value;
+    value.setName(name);
+    params.push_back(value);
 }
 
 Object Function::getParameter(std::string name){
-    return params[name];
+    return params[getParameterIndex(name)];
+}
+
+Object Function::getParameter(int index){
+    return params[index];
 }
 
 void Function::setParameter(std::string name, Object value){
-    params[name] = value;
+    params[getParameterIndex(name)] = value;
+}
+
+int Function::getParameterIndex(std::string name){
+    int index = 0;
+    for(Object param : params){
+        std::string parameter = param.getName();
+        if(parameter == name) return index;
+        index++;
+    }
+    return -1;
 }
 
 // Creates a new function and links it to its parent scope
@@ -127,7 +144,7 @@ Scope* Function::getFunctionScope(){
 }
 
 Variable returnFunction(Function* function){
-    std::cout<<"Has been evaluated="<<function->hasBeenEvaluated()<<"\n";
+    // bool has_been_evaluated = function->hasBeenEvaluated();
 
     // If the return value has already been crunched, just return it (BUT WE NEED TO CHANGE PARAMETERS)
     if(function->hasBeenEvaluated()){
@@ -139,15 +156,16 @@ Variable returnFunction(Function* function){
     // evaluate the scope to get our return variable,
     // and return the variable if it exists
     // or return a Nothing variable for a void function
-
     buildFunctionFromItsLines(function);
-    bool return_value_exists = function->isKnownVariable(function->getName() + ".scope.return");
+    Scope* function_scope = function->getScope(function->getName() + ".scope");
+    bool return_value_exists = function_scope->isKnownVariable(function_scope->getName() + ".return");
     if(!return_value_exists){
-        std::cout<<"Return value doesn\'t exist!\n";
-        function->dumpRecursive();
         SAFEERROROUT(function, ParseDebugNoReturnVariableSet, function->getName());
     }
-    return function->getVariable(function->getName() + ".scope.return");
+
+    Variable return_variable = function_scope->getVariable(function_scope->getName() + ".return");
+    function->setHasBeenEvaluated();
+    return return_variable;
 
     // else{
     //     Scope* function_scope = new Scope(name + ".scope");
@@ -175,17 +193,17 @@ void Function::clearHasBeenEvaluated(){
 void buildFunctionFromItsLines(Function* function){
     if(function->hasBeenEvaluated()) return; // add a thing here that checks if parameters are "dirty"
 
-    Scope* function_scope = new Scope(function->getName() + ".scope");
-    function_scope->setParent(function);
-    function->setFunctionScope(function_scope);
+    Scope* function_scope = new Scope("scope");
+    addScopeToScope(function, function_scope);
 
+    Scope* temp_scope = function_scope;
     for(std::string line : function->getLines()){
         std::vector<std::string> tokens = tokenizeLine(line);
         if(tokens[0] == "function"){
-            WARNING(ParseWarningNestedFunctions, line);
+            // WARNING(ParseWarningNestedFunctions, line);
             continue;
         }
-        function_scope = buildVariableAndEvaluateExpressions(function_scope, tokenizeLine(line));
+        temp_scope = buildVariableAndEvaluateExpressions(temp_scope, tokenizeLine(line));
     }
     function->setHasBeenEvaluated();
 }

@@ -9,7 +9,7 @@ class Function : public Scope{
         bool has_been_evaluated;
 
         std::vector<std::string> lines; // lines of text within me to be evaluated later
-        std::unordered_map<std::string, Object> params;
+        std::vector<Object> params;
 
         Scope* function_scope;
 
@@ -43,6 +43,8 @@ class Function : public Scope{
         void addParameter(Object param);
         void addParameter(std::string name, Object value);
         Object getParameter(std::string name);
+        Object getParameter(int index);
+        int getParameterIndex(std::string name);
         void setParameter(std::string name, Object value);
 };
 

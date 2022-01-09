@@ -23,6 +23,7 @@
 #define SyntaxErrorUnrecognizedObject SyntaxError("Unrecognized Object", "Not a known object (function, variable). Did you define it?")
 #define SyntaxErrorUnrecognizedKeyword SyntaxError("Unrecognized Keyword", "Not a recognized keyword")
 #define SyntaxErrorReinitializedVariable SyntaxError("Reinitialized Variable", "Variable was reinitialized twice!")
+#define SyntaxErrorConditionalScopeWithNoCondition SyntaxError("Conditional Scope Lacking Condition", "This conditional scope lacks any sort of boolean value")
 
 /* Arithmetic Errors */
 #define ArithmeticErrorDivideByZero ArithmeticError("Divide By Zero", "Cannot divide by zero")

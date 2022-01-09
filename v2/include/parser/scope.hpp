@@ -27,6 +27,7 @@ class Scope : public Object{
         int last_scope_index;
         enum ScopeType scope_type;
         bool is_main_scope;
+        bool truthiness;
 
         Scope* parent;
         Scope* next_scope;
@@ -87,13 +88,17 @@ class Scope : public Object{
         bool getVariableRecursive(std::string name, Variable& var);
 
         /*****************************************/
+
+        bool getTruthiness();
+        void setTruthiness(bool truthiness);
+
         void addScope(Scope scope);
         void addScope(Scope* scope);
         void addScope(enum AccessSpecifier access_specifier, Scope scope);
         void addScope(enum AccessSpecifier access_specifier, Scope* scope);
 
         Scope* getScope(std::string name);
-        bool getScopeRecursive(std::string name, Scope* scope);
+        Scope* getScopeRecursive(std::string name);
         bool hasScope(std::string name);
         bool hasScopeRecursive(std::string name);
 

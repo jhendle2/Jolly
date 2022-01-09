@@ -4,7 +4,8 @@
 std::string dropFileExtension(std::string filename){
     int dot_index = (int)filename.find('.');
     if(dot_index >= 0){
-        return filename.substr(0,dot_index-1);
+        return filename.substr(0,dot_index); // I think this is more correct
+        // return filename.substr(0,dot_index-1);
     }
     return filename;
 }
@@ -153,4 +154,29 @@ std::vector<std::string> tokenizeLine(std::string line){
         tokens.push_back(temp);
 
     return tokens;
+}
+
+bool tokensIsList(std::vector<std::string> tokens){
+    for(std::string token : tokens){
+        if(token == ",")
+            return true;
+    }
+    return false;
+}
+
+std::vector<std::vector<std::string>> listToListOfTokens(std::vector<std::string> tokens){
+    std::vector<std::vector<std::string>> list_of_token_lists;
+    std::vector<std::string> temp_tokens;
+
+    for(std::string token : tokens){
+        if(token == ","){
+            list_of_token_lists.push_back(temp_tokens);
+            temp_tokens.clear();
+        }
+        else{
+            temp_tokens.push_back(token);
+        }
+    }
+    list_of_token_lists.push_back(temp_tokens);
+    return list_of_token_lists;
 }

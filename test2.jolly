@@ -1,6 +1,19 @@
-function func1
-    Print("Hello")
-    yield 5
-end func1
+Number i = 0
+Number a = 1
+Number b = 1
+Bool stop = False
 
-func1()
+function fibonacci
+    Println(a)
+    Number c = a + b
+    a = b
+    b = c
+    if i != 10
+        i += 1
+        fibonacci()
+    else
+        Println("Baby all done")
+    end if
+end fibonacci
+
+fibonacci()

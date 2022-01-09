@@ -27,6 +27,7 @@ Scope::Scope() : Object("unnamed_scope", TYPE_SCOPE){
     this->scope_type = SCOPE_NORMAL;
     parent=nullptr;
     next_scope=nullptr;
+    truthiness=true;
     is_main_scope = false;
 }
 
@@ -35,6 +36,7 @@ Scope::Scope(enum ScopeType scope_type) : Object("unnamed_scope", TYPE_SCOPE){
     this->scope_type = scope_type;
     parent=nullptr;
     next_scope=nullptr;
+    truthiness=true;
     is_main_scope = false;
 }
 
@@ -43,6 +45,7 @@ Scope::Scope(std::string name) : Object(name, TYPE_SCOPE){
     this->scope_type = SCOPE_NORMAL;
     parent=nullptr;
     next_scope=nullptr;
+    truthiness=true;
     is_main_scope = false;
 }
 
@@ -51,6 +54,7 @@ Scope::Scope(std::string name, enum ScopeType scope_type) : Object(name, TYPE_SC
     this->scope_type = scope_type;
     parent=nullptr;
     next_scope=nullptr;
+    truthiness=true;
     is_main_scope = false;
 }
 
@@ -149,6 +153,14 @@ void Scope::updateVariableRecursive(Variable var){
     updateVariableRecursive(var.getName(), var);
 }
 
+bool Scope::getTruthiness(){
+    return truthiness;
+}
+
+void Scope::setTruthiness(bool truthiness){
+    this->truthiness = truthiness;
+}
+
 Variable Scope::updateVariableAndGetRecursive(std::string name, Variable var){
     if(variables.isKnown(name)){
         Variable v = variables.updateAndGet(name, var);
@@ -186,21 +198,6 @@ bool Scope::getVariableRecursive(std::string name, Variable& var){
 
     if(hasParent()){
         return parent->getVariableRecursive(name, var);
-    }
-
-    return false;
-}
-
-bool Scope::getScopeRecursive(std::string name, Scope* scope){
-    std::string local_name = this->name + "." + name;
-    std::cout<<"looking for="<<local_name<<"\n";
-    if(hasScope(local_name)){
-        scope = getScope(local_name);
-        return true;
-    }
-
-    if(hasParent()){
-        return parent->getScopeRecursive(name, scope);
     }
 
     return false;
@@ -250,10 +247,13 @@ void Scope::updateScopeRecursive(std::string name, Scope scope){
 }
 
 bool Scope::hasScope(std::string name){
-    return (scopes.count(name) > 0);
+    bool out = (scopes.count(name) > 0);
+    return out;
 }
 
 bool Scope::hasScopeRecursive(std::string name){
+    if(hasScope(name)) return true;
+
     if(parent != nullptr){
         if(hasScope(name)) return true;
         else return hasScopeRecursive(name);
@@ -262,9 +262,45 @@ bool Scope::hasScopeRecursive(std::string name){
 }
 
 Scope* Scope::getScope(std::string name){
-    std::cout<<"getScope("<<name<<")\n";
-    dumpRecursive();
-    return scopes[name];
+    if(hasScope(name)){
+        Scope* out = scopes[name];
+        return out; 
+    }
+    else{
+        return nullptr;
+    }
+    return new Scope();
+}
+
+Scope* Scope::getScopeRecursive(std::string name){
+
+    // if(variables.isKnown(name)){
+    // if(variables.isKnown(name)){
+    //     var = variables.get(name);
+    //     return true;
+    // }
+
+    // if(hasParent()){
+    //     return parent->getVariableRecursive(name, var);
+    // }
+
+    // return false;
+
+    // dumpRecursive();
+    std::string local_name = this->name + "." + name;
+
+    if(hasScope(local_name)){
+        Scope* temp = getScope(local_name);
+        return temp;
+    }
+
+    if(hasParent()){
+        Scope* temp = parent->getScopeRecursive(name);
+        return temp;
+    }
+
+    std::cout<<"!!something went hella wrong\n";
+    return nullptr;
 }
 
 Scope* Scope::updateAndGetScope(std::string name, Scope scope){
@@ -369,7 +405,8 @@ void addScopeToScope(Scope& parent, Scope& child){
 
 void addScopeToScope(Scope* parent, Scope* child){
     ///std::cout<<"Adding "<<child->getName()<<" to "<<parent->getName()<<"\n";
-    child->setName(parent->getName()+"."+child->getName());
+    std::string adding_name = parent->getName()+"."+child->getName();
+    child->setName(adding_name);
     child->setParent(parent);
     parent->addScope(child);
 }

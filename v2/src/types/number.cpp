@@ -1,4 +1,7 @@
+#include <math.h>
+
 #include "number.hpp"
+#include "errors.hpp"
 
 Number::Number() : Variable(TYPE_NUMBER){
 
@@ -43,6 +46,70 @@ Number Number::sub(const Number& right){
 Number Number::subEq(const Number& right){
     Number out = Number(number);
     out.number -= right.number;
+    number = out.number;
+    return out;
+}
+
+Number Number::mul(const Number& right){
+    Number out = Number(number);
+    out.number *= right.number;
+    return out;
+}
+
+Number Number::mulEq(const Number& right){
+    Number out = Number(number);
+    out.number *= right.number;
+    number = out.number;
+    return out;
+}
+
+Number Number::div(const Number& right){
+    Number out = Number(number);
+    if(right.number == 0){
+        ERROROUT(ArithmeticErrorDivideByZero, right.name);
+    }
+    out.number /= right.number;
+    return out;
+}
+
+Number Number::divEq(const Number& right){
+    Number out = Number(number);
+    if(right.number == 0){
+        ERROROUT(ArithmeticErrorDivideByZero, right.name);
+    }
+    out.number /= right.number;
+    number = out.number;
+    return out;
+}
+
+Number Number::exp(const Number& right){
+    Number out = Number(number);
+    double base = (double)(out.number);
+    double power = (double)(right.number);
+    double pow_out = pow(base,power);
+    out.number = pow_out;
+    return out;
+}
+
+Number Number::expEq(const Number& right){
+    Number out = Number(number);
+    double base = (double)(out.number);
+    double power = (double)(right.number);
+    double pow_out = pow(base,power);
+    out.number = pow_out;
+    number = out.number;
+    return out;
+}
+
+Number Number::mod(const Number& right){
+    Number out = Number(number);
+    out.number %= right.number;
+    return out;
+}
+
+Number Number::modEq(const Number& right){
+    Number out = Number(number);
+    out.number %= right.number;
     number = out.number;
     return out;
 }

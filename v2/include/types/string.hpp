@@ -11,4 +11,6 @@ class String : public Variable{
 
         Variable add(const Variable& right);
         Variable addEq(const Variable& right);
+        Variable mul(const Variable& right);
+        Variable mulEq(const Variable& right);
 };

@@ -21,15 +21,13 @@
 void initializeVariable(Scope* parent, std::string type_string, std::string variable_name){
     enum ObjectType type = getTypeFromString(type_string);
     Variable var = Variable(type);
-    ///std::cout<<"~Initialized Var="<<variable_name<<"\n";
     parent->addVariable(variable_name, var);
-    ///std::cout<<"~"<<parent->getVariable(variable_name).toString()<<"\n";
 }
 
 // Creates a new conditional scope and links it to its parent scope
-ConditionalScope* initializeConditionalScope(Scope* parent, std::vector<std::string> tokens, enum ScopeType scope_type){
+ConditionalScope* initializeConditionalScope(Scope* parent, std::vector<std::string> tokens, enum ScopeType scope_type, bool truthiness){
     int last_scope_index = parent->lastScopeIndex();
-    ConditionalScope* new_condition = new ConditionalScope(scope_type, last_scope_index);  
+    ConditionalScope* new_condition = new ConditionalScope(scope_type, last_scope_index, truthiness);  
     addScopeToScope(parent, new_condition);
     return new_condition;
 }
@@ -45,7 +43,6 @@ ConditionalScope* initializeConditionalScope(Scope* parent, std::vector<std::str
 // If it can't, there's PROBABLY an error and we should quit
 Scope* tryAndEndScope(Scope* scope, std::vector<std::string> tokens){
     bool has_parent = scope->hasParent();
-    ///std::cout<<"&&&&&&&&<"<<scope->getName()<<"> has_parent="<<has_parent<<"\n";
     if(has_parent){
         return scope->getParent();
     }
@@ -93,7 +90,6 @@ Scope* initializeKeyword(Scope* parent, enum ReservedKeyword keyword_type, std::
 
         // Crash if we're not in a function
         if(!currently_inside_function){
-            std::cout<<"!!NOT INSIDE FUNC\n";
             SAFEERROROUT(parent, ParseErrorOrphanYield, tokensToString(tokens));
         }
 
@@ -108,21 +104,24 @@ Scope* initializeKeyword(Scope* parent, enum ReservedKeyword keyword_type, std::
 
         // yield variable
         return_variable = evaluateExpression(parent, shiftTokens(tokens, 1));
-        return_variable.setName(parent->getName() + ".return");
+        std::string return_name = parent->getName() + ".return";
+        return_variable.setName(return_name);
         
         // parent->getVariableRecursive(tokens[1], return_variable);
         if(!parent->hasParent()){ // this might be unnecessary
-            std::cout<<"!!SECOND CHECK\n";
             SAFEERROROUT(parent, ParseErrorOrphanYield, tokensToString(tokens));
         }
 
-        parent = parent->getParent();
+        // parent = parent->getParent();
         parent->addVariable(return_variable);
+        parent = parent->getParent();
         return parent;
     }
     
     // Function keyword
     // Initialize a function
+
+    /*
     if(keyword_type == RESERVED_FUNCTION){
         if(tokens.size() == 1){
             SAFEERROROUT(parent, ParseErrorIncompleteFunctionHeader, tokensToString(tokens));
@@ -139,21 +138,30 @@ Scope* initializeKeyword(Scope* parent, enum ReservedKeyword keyword_type, std::
         new_function->setParent(parent);
         currently_inside_function = true;
         parent = new_function;
-    }
+    }*/
 
 
     if(keyword_type == RESERVED_IF){
+        if(tokens.size() == 1){
+            SAFEERROROUT(parent, SyntaxErrorConditionalScopeWithNoCondition, tokensToString(tokens));
+        }
+
+        std::vector<std::string> conditional_expression_tokens = shiftTokens(tokens, 1);
+        Boolean condition = evaluateExpression(parent, conditional_expression_tokens);
+        bool truthiness = condition.getBoolean();
 
         // Nested IF scopes
         if(last_conditional_scope != nullptr){
-            Scope* nested_scope = initializeConditionalScope(last_conditional_scope, tokens, SCOPE_IF);
+            Scope* nested_scope = initializeConditionalScope(last_conditional_scope, tokens, SCOPE_IF, truthiness);
             last_conditional_scope = nested_scope;
+            last_conditional_scope->setTruthiness(truthiness);
             return last_conditional_scope;
         }
 
         // Level 1 IF scope
         else{
-            last_conditional_scope = initializeConditionalScope(parent, tokens, SCOPE_IF);
+            last_conditional_scope = initializeConditionalScope(parent, tokens, SCOPE_IF, truthiness);
+            last_conditional_scope->setTruthiness(truthiness);
         }
         return last_conditional_scope;
     }
@@ -162,7 +170,8 @@ Scope* initializeKeyword(Scope* parent, enum ReservedKeyword keyword_type, std::
         parent = tryAndEndScope(last_conditional_scope, tokens);
 
         if(last_conditional_scope != nullptr){
-            ConditionalScope* new_conditional_scope = initializeConditionalScope(parent, tokens, SCOPE_ELSE);
+            // Set me to truthy true if the previous scope was truthy false
+            ConditionalScope* new_conditional_scope = initializeConditionalScope(parent, tokens, SCOPE_ELSE, !(last_conditional_scope->getTruthiness()));
             new_conditional_scope->setParent(parent);
             parent->addNextScope(new_conditional_scope);
             last_conditional_scope = new_conditional_scope;
@@ -180,7 +189,7 @@ void Print(Scope* parent, std::vector<std::string> tokens){
     Variable print_variable;
 
     // Print(expression)
-    if(tokens.size() > 4){
+    if(tokens.size() >= 4){
         std::vector<std::string> shifted_tokens = shiftTokens(tokens, 1);
         print_variable = evaluateExpression(parent, shifted_tokens);
         std::cout<<"> "<<print_variable.toStringValue();
@@ -199,6 +208,7 @@ void Print(Scope* parent, std::vector<std::string> tokens){
 // Adds the generated scopes and variables to the parent scope (this allows for recursion)
 // Returns the new scope generated for reassigning the parent scope
 Scope* buildVariableAndEvaluateExpressions(Scope* parent, std::vector<std::string> tokens){
+    // std::cout<<"toks="<<tokensToString(tokens)<<"\n";
     ///std::cout<<"#################CURRENTLY IN = "<<parent->getName()<<"\n";
     // Obvious error
     if(tokens.size() == 0)
@@ -216,6 +226,14 @@ Scope* buildVariableAndEvaluateExpressions(Scope* parent, std::vector<std::strin
         
         SAFEERROROUT(parent, ParseDebugOneToken, tokensToString(tokens));
     }
+
+    // // Makes IF scopes work
+    // if(tokens[0]=="end"){
+    //     parent = initializeKeyword(parent, RESERVED_END, tokens);
+    //     return parent;
+    // }
+
+    if(parent->getTruthiness() == false) return parent;
 
     // Makes Print/Println work
     if(tokens[0]=="Print"){
@@ -273,15 +291,40 @@ Scope* buildVariableAndEvaluateExpressions(Scope* parent, std::vector<std::strin
     }
 
     // If we are calling a function and it is known, we should evaluate it and "return" its return variable
-    Function* temp_function = nullptr;
-    parent->dumpRecursive();
-    bool first_token_is_known_function = parent->getScopeRecursive(tokens[0], temp_function);
-    std::cout<<"("<<tokens[0]<<") ftikf="<<first_token_is_known_function<<"\n";
+    Function* temp_function = new Function("this is a test");
+    // parent->dumpRecursive();
+
+    // I think the issue is we're not setting parent to the function itself
+    temp_function = (Function*)(parent->getScopeRecursive(tokens[0]));
+    bool first_token_is_known_function = (temp_function!=nullptr); //parent->getScopeRecursive(tokens[0], temp_function); // THIS FUNCTION ISN'T WORKING
+
     if(first_token_is_known_function){
         // DO THE FUNCTION
-        if(temp_function==nullptr)
+        if(temp_function==nullptr){
             SAFEERROROUT(parent, SyntaxErrorUnrecognizedFunction,"whoopsie daisy");
-        returnFunction(temp_function);
+        }
+        else {
+            // TODO: PASS IN THE PARAMETERS
+            // maybe interate thru a list, evaluating parameters
+            bool tokens_is_list = tokensIsList(tokens);
+            
+            if(tokens_is_list){
+                std::vector<std::string> tokens_shifted = shiftTokens(tokens, 2); // Gets us in the parentheses
+                std::vector<std::vector<std::string>> list_of_tokens_lists = listToListOfTokens(tokens_shifted); // Each parameter is its own vector
+                int parameter_index = 0;
+                for(std::vector<std::string> parameter_expression : list_of_tokens_lists){
+                    // TODO: FINISH THIS
+                    Variable evaluated_parameter = evaluateExpression(parent, parameter_expression);
+                    std::string parameter_name = temp_function->getParameter(parameter_index).getName();
+                    temp_function->addParameter(parameter_name, evaluated_parameter);
+                }
+                returnFunction(temp_function);
+
+            }
+            else{
+                returnFunction(temp_function); // <- i think the error is temp_function is somehow uninitialized??
+            }
+        }
         // Variable return_variable = returnFunction(temp_function);
         // parent->addVariable(return_variable);
         return parent;

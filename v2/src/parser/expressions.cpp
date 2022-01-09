@@ -96,6 +96,14 @@ Variable applyOp(Scope* scope, Variable a, Variable b, std::string op){
         scope->updateVariableRecursive(a);
         return a;
     }
+    else if(same_types && op == "=="){
+        Boolean equality = a.equality(b);
+        return equality;
+    }
+    else if(same_types && op == "!="){
+        Boolean inequality = a.inequality(b);
+        return inequality;
+    }
 
     if(a_type == TYPE_NUMBER){
         Number an = Number(a);
@@ -103,6 +111,16 @@ Variable applyOp(Scope* scope, Variable a, Variable b, std::string op){
             Number bn = Number(b);
             if(op=="+=") return scope->updateVariableAndGetRecursive(an.addEq(bn));
             else if(op=="+") return scope->updateVariableAndGetRecursive(an.add(bn));
+            else if(op=="-=") return scope->updateVariableAndGetRecursive(an.subEq(bn));
+            else if(op=="-") return scope->updateVariableAndGetRecursive(an.sub(bn));
+            else if(op=="*=") return scope->updateVariableAndGetRecursive(an.mulEq(bn));
+            else if(op=="*") return scope->updateVariableAndGetRecursive(an.mul(bn));
+            else if(op=="/=") return scope->updateVariableAndGetRecursive(an.divEq(bn));
+            else if(op=="/") return scope->updateVariableAndGetRecursive(an.div(bn));
+            else if(op=="^=") return scope->updateVariableAndGetRecursive(an.expEq(bn));
+            else if(op=="^") return scope->updateVariableAndGetRecursive(an.exp(bn));
+            else if(op=="%=") return scope->updateVariableAndGetRecursive(an.modEq(bn));
+            else if(op=="%") return scope->updateVariableAndGetRecursive(an.mod(bn));
         }
         return an;
     }
@@ -121,6 +139,8 @@ Variable applyOp(Scope* scope, Variable a, Variable b, std::string op){
         String an = String(a);
         if(op=="+=") return scope->updateVariableAndGetRecursive(an.addEq(b));
         else if(op=="+") return scope->updateVariableAndGetRecursive(an.add(b));
+        else if(op=="*=") return scope->updateVariableAndGetRecursive(an.mulEq(b));
+        else if(op=="*") return scope->updateVariableAndGetRecursive(an.mul(b));
         return an;
     }
 
@@ -147,7 +167,6 @@ Variable evaluateExpression(Scope* scope, std::vector<std::string> tokens){
     std::stack<std::string> operators;
 
     for(int i = 0; i<(int)tokens.size(); i++){
-        //std::cout<<"Token=<"<<tokens[i]<<">\n";
 
         if(tokens[i] ==  "") continue;
 
@@ -156,7 +175,6 @@ Variable evaluateExpression(Scope* scope, std::vector<std::string> tokens){
         }
 
         else if(isNumber(tokens[i])){
-            // std::cout<<tokens[i]<<" is number\n";
             Number number(tokens[i]);
             number.setName("constant");
             values.push(number);
@@ -175,10 +193,8 @@ Variable evaluateExpression(Scope* scope, std::vector<std::string> tokens){
         }
 
         else if(isChar(tokens[i])){
-            std::cout<<"Character with "<<tokens[i]<<"\n";
             Character c(tokens[i]);
             c.setName("constant");
-            std::cout<<"--"<<c.toString()<<"\n";
             values.push(c);
         }
 
@@ -232,11 +248,11 @@ Variable evaluateExpression(Scope* scope, std::vector<std::string> tokens){
                     continue;
                 }
 
-                Function* looked_up_function;
-                bool has_function = scope->getScopeRecursive(tokens[i], looked_up_function);
+                Function* looked_up_function = (Function*)(scope->getScopeRecursive(tokens[i])); // SOMETHING IS WRONG HERE, WHY DOES IT RETURN TRUE FOR NULLPTR ASSIGN
+                bool has_function = (looked_up_function!=nullptr);
                 if(has_function){
                     Variable returned_variable = returnFunction(looked_up_function);
-                    values.push(looked_up_function);
+                    values.push(returned_variable);
                     continue;
                 }
 

@@ -59,11 +59,7 @@ std::vector<struct readLinesStruct> readLinesAsLinesAndFunctions(std::vector<std
     temp_lines.is_function = false;
 
     for(std::string line : lines){
-        std::cout<<"ON="<<line<<"\n";
         std::vector<std::string> line_as_tokens = tokenizeLine(line);
-        
-        std::cout<<"#lines&funcs size = "<<lines_and_functions.size()<<"\n";
-        std::cout<<"#temp lines size = "<<temp_lines.lines.size()<<"\n";
 
         if(line_as_tokens[0] == "function"){
             lines_and_functions.push_back(temp_lines);
@@ -74,7 +70,6 @@ std::vector<struct readLinesStruct> readLinesAsLinesAndFunctions(std::vector<std
         }
 
         else if(line_as_tokens[0] == "end"){
-            std::cout<<"$$end\n";
             temp_lines.lines.push_back(line);
             if(line_as_tokens[1] != "if" && temp_lines.is_function){
                 lines_and_functions.push_back(temp_lines);
@@ -84,7 +79,6 @@ std::vector<struct readLinesStruct> readLinesAsLinesAndFunctions(std::vector<std
         }
 
         else{
-            std::cout<<"temp_lines pushing back "<<line<<"\n";
             temp_lines.lines.push_back(line);
         }
     }

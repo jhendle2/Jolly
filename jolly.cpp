@@ -89,7 +89,7 @@ void InterpretTwoPass(std::string filename){
     std::string scope_name = dropFileExtension(filename);
     NOTE("Parsing scope: " + scope_name);
     Scope* main_scope = new Scope("file."+scope_name);
-    main_scope->setMainScope(); // For setting up global variables
+    main_scope->setMainScope(); // TODO: For setting up global variables
     Scope* current_scope = main_scope;
     for(readLinesStruct lines : lines_and_functions){
         if(lines.is_function){
@@ -97,7 +97,7 @@ void InterpretTwoPass(std::string filename){
             for(std::string line : lines.lines){
                 f->addLine(line);
             }
-            addScopeToScope(main_scope, f);
+            addScopeToScope(current_scope, f);
         }
         // else{
         //     for(std::string line : lines.lines){
@@ -109,18 +109,24 @@ void InterpretTwoPass(std::string filename){
         // }
     }
 
+    current_scope = main_scope;
     // So functions are populated before the global vars
     for(readLinesStruct lines : lines_and_functions){
         if(!lines.is_function){
             for(std::string line : lines.lines){
-                std::cout<< line <<"\n";
                 std::vector<std::string> lineAsTokens = tokenizeLine(line);
                 current_scope = buildVariableAndEvaluateExpressions(current_scope, lineAsTokens);
             }
         }
     }
 
-    main_scope->dumpRecursive();
+    // main_scope->dumpRecursive();
+
+    // Function* f = (Function*)main_scope->getScope("file.test2.func1");
+    // Variable return_variable = returnFunction(f);
+    // return_variable.dump();
+
+    delete main_scope;
 }
 
 int main(int argc, char** argv){
