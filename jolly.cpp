@@ -71,7 +71,6 @@ void InterpretOnePass(std::string filename){
 }
 
 void InterpretTwoPass(std::string filename){
-    NOTE("Starting Smile-Parser");
 
     std::vector<std::string> file_as_lines = readFileAsLines(filename);
 
@@ -87,7 +86,7 @@ void InterpretTwoPass(std::string filename){
 
     // Populate functions first
     std::string scope_name = dropFileExtension(filename);
-    NOTE("Parsing scope: " + scope_name);
+    NOTE("Building Functions: " + scope_name);
     Scope* main_scope = new Scope("file."+scope_name);
     main_scope->setMainScope(); // TODO: For setting up global variables
     Scope* current_scope = main_scope;
@@ -99,16 +98,9 @@ void InterpretTwoPass(std::string filename){
             }
             addScopeToScope(current_scope, f);
         }
-        // else{
-        //     for(std::string line : lines.lines){
-        //         std::cout<< line <<"\n";
-        //         std::vector<std::string> lineAsTokens = tokenizeLine(line);
-        //         bool init_global_vars = true;
-        //         current_scope = buildVariableAndEvaluateExpressions(current_scope, lineAsTokens, init_global_vars);
-        //     }
-        // }
     }
 
+    NOTE("Building Variables: " + scope_name);
     current_scope = main_scope;
     // So functions are populated before the global vars
     for(readLinesStruct lines : lines_and_functions){
@@ -130,6 +122,7 @@ void InterpretTwoPass(std::string filename){
 }
 
 int main(int argc, char** argv){
+    NOTE("Starting Smile-Parser");
 
     std::string filename = std::string(argv[1]);
 

@@ -34,3 +34,42 @@ Boolean Boolean::addEq(const Boolean& right){
     boolean = out.boolean;
     return out;
 }
+
+Boolean Boolean::_or(const Boolean& right){
+    Boolean out = Boolean(boolean);
+    out.boolean |= right.boolean;
+    return out;
+}
+
+Boolean Boolean::_orEq(const Boolean& right){
+    Boolean out = Boolean(boolean);
+    out.boolean |= right.boolean;
+    boolean = out.boolean;
+    return out;
+}
+
+Boolean Boolean::_and(const Boolean& right){
+    Boolean out = Boolean(boolean);
+    out.boolean &= right.boolean;
+    return out;
+}
+
+Boolean Boolean::_andEq(const Boolean& right){
+    Boolean out = Boolean(boolean);
+    out.boolean &= right.boolean;
+    boolean = out.boolean;
+    return out;
+}
+
+Boolean Boolean::_xor(const Boolean& right){
+    Boolean out = Boolean(boolean);
+    out.boolean ^= right.boolean;
+    return out;
+}
+
+Boolean Boolean::_xorEq(const Boolean& right){
+    Boolean out = Boolean(boolean);
+    out.boolean ^= right.boolean;
+    boolean = out.boolean;
+    return out;
+}

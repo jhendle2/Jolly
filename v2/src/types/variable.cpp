@@ -18,7 +18,7 @@ Variable::Variable(enum ObjectType type) : Object(type){
     number = 0;
     character = '\0';
     boolean = false;
-    string = "";
+    string = "nothing";
 }
 
 
@@ -26,21 +26,21 @@ Variable::Variable(const int number) : Object(TYPE_NUMBER){
     this->number = number;
     character = '\0';
     boolean = false;
-    string = "";
+    string = "nothing";
 }
 
 Variable::Variable(const bool boolean) : Object(TYPE_BOOL){
     number = 0;
     character = '\0';
     this->boolean = boolean;
-    string = "";
+    string = "nothing";
 }
 
 Variable::Variable(const char character) : Object(TYPE_CHAR){
     number = 0;
     this->character = character;
     boolean = false;
-    string = "";
+    string = "nothing";
 }
 
 Variable::Variable(const char* string) : Object(TYPE_STRING){
