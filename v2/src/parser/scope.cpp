@@ -109,24 +109,29 @@ ObjectTable<Variable>& Scope::getVariables(){
 }
 
 void Scope::addVariable(Variable var){
+    std::cout<<"addVariable("<<var.getName()<<")\n";
     var.setAccess(PRIVATE);
     variables.add(var);
+    std::cout<<"addedVariable("<<var.getName()<<")\n";
 }
 
 void Scope::addVariable(std::string name, Variable var){
     var.setAccess(PRIVATE);
-    var.setName(name);
+    var.setName(this->name + "." + name);
+    // var.setName(name);
     variables.add(var);
 }
 
 void Scope::addVariable(enum AccessSpecifier access, Variable var){
     var.setAccess(access);
-    variables.add(var);
+    variables.add(this->name + "." + var.getName(), var);
+    // variables.add(var);
 }
 
 void Scope::addVariable(std::string name, enum AccessSpecifier access, Variable var){
     var.setAccess(access);
-    var.setName(name);
+    var.setName(this->name + "." + name);
+    // var.setName(name);
     variables.add(var);
 }
 
@@ -139,8 +144,9 @@ void Scope::updateVariable(std::string name, Variable var){
 }
 
 void Scope::updateVariableRecursive(std::string name, Variable var){
-    if(variables.isKnown(name)){
-        variables.update(name, var);
+    std::string local_name = this->name + "." + name;
+    if(variables.isKnown(local_name)){
+        variables.update(local_name, var);
         return;
     }
 
@@ -162,8 +168,9 @@ void Scope::setTruthiness(bool truthiness){
 }
 
 Variable Scope::updateVariableAndGetRecursive(std::string name, Variable var){
-    if(variables.isKnown(name)){
-        Variable v = variables.updateAndGet(name, var);
+    std::string local_name = this->name + "." + name;
+    if(variables.isKnown(local_name)){
+        Variable v = variables.updateAndGet(local_name, var);
         return v;
     }
 
@@ -191,8 +198,9 @@ Variable Scope::getVariable(std::string name){
 }
 
 bool Scope::getVariableRecursive(std::string name, Variable& var){
-    if(variables.isKnown(name)){
-        var = variables.get(name);
+    std::string local_name = this->name + "." + name;
+    if(variables.isKnown(local_name)){
+        var = variables.get(local_name);
         return true;
     }
 
@@ -299,7 +307,6 @@ Scope* Scope::getScopeRecursive(std::string name){
         return temp;
     }
 
-    std::cout<<"!!something went hella wrong\n";
     return nullptr;
 }
 
@@ -404,7 +411,6 @@ void addScopeToScope(Scope& parent, Scope& child){
 }
 
 void addScopeToScope(Scope* parent, Scope* child){
-    ///std::cout<<"Adding "<<child->getName()<<" to "<<parent->getName()<<"\n";
     std::string adding_name = parent->getName()+"."+child->getName();
     child->setName(adding_name);
     child->setParent(parent);

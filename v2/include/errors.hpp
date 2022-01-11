@@ -24,9 +24,14 @@
 #define SyntaxErrorUnrecognizedKeyword SyntaxError("Unrecognized Keyword", "Not a recognized keyword")
 #define SyntaxErrorReinitializedVariable SyntaxError("Reinitialized Variable", "Variable was reinitialized twice!")
 #define SyntaxErrorConditionalScopeWithNoCondition SyntaxError("Conditional Scope Lacking Condition", "This conditional scope lacks any sort of boolean value")
+#define SyntaxErrorElseWithoutIf SyntaxError("Else without If or Elsif", "This else lacks a friend :(")
+
+/* Syntax Warnings */
+#define SyntaxWarningUnknownVariable BaseWarning("Unknown Variable", "This variable is unknown and will be initialized to Nothing")
 
 /* Arithmetic Errors */
 #define ArithmeticErrorDivideByZero ArithmeticError("Divide By Zero", "Cannot divide by zero")
+#define ArithmeticErrorIncompatibleTypes SyntaxError("Incompatible Types", "Cannot perform specified arithmetic operation between types")
 
 /* Parse Errors */
 #define ParseErrorUnrecognizedVariable ParseError("Unrecognized Variable", "Parser encountered an empty variable name")
@@ -35,6 +40,11 @@
 #define ParseErrorUnexpectedToken ParseError("Unexpected Token", "The following is an unexpected token within this scope")
 #define ParseErrorIncompleteFunctionHeader ParseError("Incomplete Function Header", "Function header is missing integral tokens")
 #define ParseErrorOrphanYield ParseError("Orphan Yield", "This yield is an orphan and lacks a parent function")
+#define ParseErrorOrphanConditionalScope ParseError("Orphan Conditional Scope", "This conditional scope lacks a parent to leave")
+#define ParseErrorCriticalScopeError ParseError("Critical Scope Error", "This scope lacked a parent and urgently needed to exit")
+
+#define RECURSIONDEPTHLIMIT 100
+#define ParseErrorRecursionLimitReached ParseError("Recursion Limit Reached", "Recursion depth has reached its max of 100")
 
 #define ParseDebugNoTokens "\n[Parse Debug - No Tokens]\t"
 #define ParseDebugOneToken "\n[Parse Debug - One Token]\t"

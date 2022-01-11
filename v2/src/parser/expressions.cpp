@@ -29,13 +29,22 @@ std::unordered_map<std::string, int> prio = {
     {"==", 5},
     {"!=", 5},
     {"and", 4},
+    {"&&", 4},
     {"xor", 3},
+    {"^^", 3},
     {"or", 3},
+    {"||", 3},
     {"+=", 2},
     {"-=", 2},
     {"*=", 2},
     {"/=", 2},
     {"%=", 2},
+    {"|=", 2},
+    {"or=", 2},
+    {"^=", 2},
+    {"xor=", 2},
+    {"&=", 2},
+    {"and=", 2},
     {"=", 2},
     {":", 2},
     {"(", 0},
@@ -150,8 +159,24 @@ Variable applyOp(Scope* scope, Variable a, Variable b, std::string op){
             Boolean bn = Boolean(b);
             if(op=="+=") return scope->updateVariableAndGetRecursive(an.addEq(bn));
             else if(op=="+") return scope->updateVariableAndGetRecursive(an.add(bn));
+            else if(op=="|=") return scope->updateVariableAndGetRecursive(an._orEq(bn));
+            else if(op=="or=") return scope->updateVariableAndGetRecursive(an._orEq(bn));
+            else if(op=="or") return scope->updateVariableAndGetRecursive(an._or(bn));
+            else if(op=="||") return scope->updateVariableAndGetRecursive(an._or(bn));
+            else if(op=="&=") return scope->updateVariableAndGetRecursive(an._andEq(bn));
+            else if(op=="and=") return scope->updateVariableAndGetRecursive(an._andEq(bn));
+            else if(op=="and") return scope->updateVariableAndGetRecursive(an._and(bn));
+            else if(op=="&&") return scope->updateVariableAndGetRecursive(an._and(bn));
+            else if(op=="^=") return scope->updateVariableAndGetRecursive(an._xorEq(bn));
+            else if(op=="xor=") return scope->updateVariableAndGetRecursive(an._xorEq(bn));
+            else if(op=="xor") return scope->updateVariableAndGetRecursive(an._xor(bn));
+            else if(op=="^^") return scope->updateVariableAndGetRecursive(an._xor(bn));
         }
         return an;
+    }
+
+    else{
+        SAFEERROROUT(scope, ArithmeticErrorIncompatibleTypes, a.getName() + op + b.getName());
     }
 
     return Variable();
@@ -248,11 +273,12 @@ Variable evaluateExpression(Scope* scope, std::vector<std::string> tokens){
                     continue;
                 }
 
-                Function* looked_up_function = (Function*)(scope->getScopeRecursive(tokens[i])); // SOMETHING IS WRONG HERE, WHY DOES IT RETURN TRUE FOR NULLPTR ASSIGN
-                bool has_function = (looked_up_function!=nullptr);
-                if(has_function){
-                    Variable returned_variable = returnFunction(looked_up_function);
-                    values.push(returned_variable);
+                Scope* func_as_scope = scope->getScopeRecursive(tokens[i]);
+                bool first_token_is_known_func = (func_as_scope != nullptr);
+                if(first_token_is_known_func){
+                    Function* func = (Function*)func_as_scope;
+                    Variable function_return = returnFunction(func); // Evaluates the function if it hasn't already been. Then pushes this variable to the expression stack
+                    values.push(function_return);
                     continue;
                 }
 
