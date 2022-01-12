@@ -11,6 +11,7 @@ enum ObjectType{
     TYPE_STRING,
     TYPE_OBJECT,
     TYPE_VARIABLE,
+    TYPE_LIST,
     TYPE_FUNCTION, // Likely to be deprecated in favor of using TYPE_SCOPE + an enum ScopeType SCOPE_FUNCTION
     TYPE_SCOPE,
 

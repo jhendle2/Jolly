@@ -46,13 +46,6 @@ class Scope : public Object{
         void setScopeType(enum ScopeType);
         enum ScopeType getScopeType();
 
-        void addParameter(Object param);
-        void addParameter(std::string name, Object param);
-        // Object getParameter(int index);
-        Object getParameter(std::string name);
-
-        void setParameter(std::string name, Object value);
-
         // virtual void evaluate();
 
         virtual void dump();

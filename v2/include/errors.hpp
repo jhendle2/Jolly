@@ -45,7 +45,7 @@
 #define ParseErrorOrphanTakes ParseError("Orphan Takes", "Use of {takes} keyword outside of a function")
 #define ParseErrorUnexpectedParam ParseError("Unexpected Parameter", "Supplied more parameters than function was expecting")
 
-#define RECURSIONDEPTHLIMIT 100
+#define RECURSIONDEPTHLIMIT 500
 #define ParseErrorRecursionLimitReached ParseError("Recursion Limit Reached", "Recursion depth has reached its max of 100")
 
 #define ParseDebugNoTokens "\n[Parse Debug - No Tokens]\t"

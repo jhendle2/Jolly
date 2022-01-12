@@ -1,24 +1,37 @@
 # Incredibly sloppy FizzBuzz code because elsif doesn't exist yet :)
-Number counter = 0
+# _smile.show_tokens()
+
 function FizzBuzz
-    if(counter == 50)
-       yield
+    takes Number n
+
+    Bool b = False
+
+    if n%3 == 0
+        Print("Fizz")
+        b = True
     end if
-    counter += 1
-    if counter%15 == 0
-        Println("fizzbuzz")
-        FizzBuzz()
+
+    if n%5 == 0
+        Print("Buzz")
+        b = True
     end if
-    if counter%5 == 0
-        Println("buzz")
-        FizzBuzz()
+
+    if b
+        Println()
+    else
+        Println(n)
     end if
-    if counter%3 == 0
-        Println("fizz")
-        FizzBuzz()
-    end if
-    Println(counter)
-    FizzBuzz()
 end FizzBuzz
 
-FizzBuzz()
+Number i = 0
+function Recurse
+    takes Number limit
+    
+    if i != limit
+        i += 1
+        FizzBuzz(i)
+        Recurse(limit)
+    end if
+end Recurse
+
+Recurse(50)

@@ -17,3 +17,5 @@ And also this isn't working...
 
 * Add boolean operator symbols instead of just words
 * Add not operator
+
+* Fix lists

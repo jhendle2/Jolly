@@ -32,4 +32,4 @@ class Function : public Scope{
         void dumpRecursive();
 };
 
-Variable returnFunction(Function* func); // re-evaluates return variable
+Variable returnFunction(Function* func, std::vector<std::string> params); // re-evaluates return variable

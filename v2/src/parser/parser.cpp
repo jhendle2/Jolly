@@ -11,7 +11,8 @@
 #include "expressions.hpp"
 #include "function.hpp"
 
-#include "variable.hpp"
+// #include "variable.hpp"
+#include "types.hpp"
 #include "object_table.hpp"
 #include "scope.hpp"
 #include "function.hpp"
@@ -152,21 +153,26 @@ Scope* initializeKeyword(Scope* parent, enum ReservedKeyword keyword_type, std::
         return parent;
     }
     
-    if(keyword_type == RESERVED_TAKES){
-        if(parent->getScopeType() != SCOPE_FUNCTION){
-            SAFEERROROUT(parent, ParseErrorOrphanTakes, tokensToString(tokens));
-        }
+    // if(keyword_type == RESERVED_TAKES){
+    //     if(parent->getScopeType() != SCOPE_FUNCTION){
+    //         SAFEERROROUT(parent, ParseErrorOrphanTakes, tokensToString(tokens));
+    //     }
 
-        if(tokens.size() == 1){
-            SAFEERROROUT(parent, SyntaxErrorIncompleteStatement, tokensToString(tokens));
-        }
+    //     if(tokens.size() < 3){
+    //         SAFEERROROUT(parent, SyntaxErrorIncompleteStatement, tokensToString(tokens));
+    //     }
 
-        std::cout<<"Hello\n";
-        // Initializes the variables from takes
-        std::vector<std::string> tokens_shifted = shiftTokens(tokens, 1);
-        parent = buildVariableAndEvaluateExpressions(parent, tokens_shifted);
-        return parent;
-    }
+    //     enum ObjectType param_type = getTypeFromString(tokens[1]);
+    //     if(param_type == TYPE_INVALID){
+    //         SAFEERROROUT(parent, SyntaxErrorUnrecognizedType, tokensToString(tokens));
+    //     }
+
+    //     std::string param_name = tokens[2];
+    //     Variable param_var = Variable(param_type);
+    //     Function* func = (Function*)parent;
+    //     func->addParam(param_name, param_var);
+    //     return parent;
+    // }
 
     return parent;
 }
@@ -179,13 +185,28 @@ void Print(Scope* parent, std::vector<std::string> tokens){
     if(tokens.size() >= 4){
         std::vector<std::string> shifted_tokens = shiftTokens(tokens, 1);
         print_variable = evaluateExpression(parent, shifted_tokens);
-        std::cout<<"> "<<print_variable.toStringValue();
+        // std::cout<<"> "<<print_variable.toStringValue();
+        if(print_variable.getType() == TYPE_LIST){
+            List* list_var = (List*)(&print_variable);
+            std::cout<<list_var->toStringValue()<<"\n";
+            return;
+        }
+        std::cout<<print_variable.toStringValue();
         return;
     }
 
     // Print(value)
     bool exists = parent->getVariableRecursive(tokens[2], print_variable);
-    if(exists) std::cout<<"> "<<print_variable.toStringValue();
+    // if(exists) std::cout<<"> "<<print_variable.toStringValue();
+    if(exists){
+        if(print_variable.getType() == TYPE_LIST){
+            List* list_var = (List*)(&print_variable);
+            std::cout<<list_var->toStringValue()<<"\n";
+            return;
+        }
+        std::cout<<print_variable.toStringValue();
+        return;
+    }
 }
 
 // Internal debugging so I don't have to keep re-compiling
@@ -326,7 +347,9 @@ Scope* buildVariableAndEvaluateExpressions(Scope* parent, std::vector<std::strin
     bool first_token_is_known_func = (func_as_scope != nullptr);
     if(first_token_is_known_func){
         Function* func = (Function*)func_as_scope;
-        Variable function_return = returnFunction(func); // Evaluates the function if it hasn't already been. This variable is thrown away
+        std::vector<std::string> tokens_remaining = shiftTokens(tokens, 2); // drops the function name and the first parenthesis token
+        tokens_remaining.pop_back(); // drops the last parenthesis
+        Variable function_return = returnFunction(func, tokens_remaining); // Evaluates the function if it hasn't already been. This variable is thrown away
         return parent;
     }
 

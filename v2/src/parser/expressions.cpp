@@ -73,6 +73,7 @@ bool isDelimiter(char c){
         c=='!' ||
         c==':' ||
         c=='?' ||
+        c==',' ||
         c=='<' ||
         c=='>'
     );
@@ -173,6 +174,13 @@ Variable applyOp(Scope* scope, Variable a, Variable b, std::string op){
             else if(op=="^^") return scope->updateVariableAndGetRecursive(an._xor(bn));
         }
         return an;
+    }
+
+    else if(a_type == TYPE_LIST){
+        List* an = (List*)(&a);
+        if(op=="+=") return scope->updateVariableAndGetRecursive(an->addEq(b));
+        else if(op=="+") return scope->updateVariableAndGetRecursive(an->add(b));
+        return a;
     }
 
     else{
@@ -277,7 +285,16 @@ Variable evaluateExpression(Scope* scope, std::vector<std::string> tokens){
                 bool first_token_is_known_func = (func_as_scope != nullptr);
                 if(first_token_is_known_func){
                     Function* func = (Function*)func_as_scope;
-                    Variable function_return = returnFunction(func); // Evaluates the function if it hasn't already been. Then pushes this variable to the expression stack
+                    std::vector<std::string> function_tokens;
+                    int j;
+                    for(j = i + 1; j < (int)tokens.size(); j++){
+                        if(tokens[j] == ")") break;
+                        else{
+                            function_tokens.push_back(tokens[j]);
+                        }
+                    }
+                    i = j;
+                    Variable function_return = returnFunction(func, function_tokens); // Evaluates the function if it hasn't already been. Then pushes this variable to the expression stack
                     values.push(function_return);
                     continue;
                 }

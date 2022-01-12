@@ -6,6 +6,7 @@ bool isObjectType(std::string s){
         s=="Boolean" ||
         s=="Bool" ||
         s=="Character" ||
+        s=="List" ||
         s=="Nothing"
         );
 }
@@ -88,6 +89,8 @@ enum ObjectType getTypeFromString(std::string str){
         return TYPE_CHAR;
     else if(str == "Bool" || str == "Boolean")
         return TYPE_BOOL;
+    else if(str == "List")
+        return TYPE_LIST;
     else if(str == "Nothing")
         return TYPE_NOTHING;
     
@@ -108,6 +111,8 @@ std::string typeToString(enum ObjectType type){
             return "Number";
         case TYPE_OBJECT:
             return "Object";
+        case TYPE_LIST:
+            return "List";
         default:
         case TYPE_INVALID:
             return "Invalid";
