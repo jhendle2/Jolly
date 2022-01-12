@@ -86,8 +86,42 @@ Scope* initializeKeyword(Scope* parent, enum ReservedKeyword keyword_type, std::
         }
     }
 
+    if(keyword_type == RESERVED_IF){
+        if(tokens.size() == 1){
+            SAFEERROROUT(parent, SyntaxErrorConditionalScopeWithNoCondition, tokensToString(tokens));
+        }
+
+        std::vector<std::string> tokens_shifted = shiftTokens(tokens, 1);
+        Variable condition_variable = evaluateExpression(parent, tokens_shifted);
+        bool truthiness = condition_variable.getBoolean() && parent->getTruthiness(); // If my parent is false, I must be false
+        ConditionalScope* if_scope = initializeConditionalScope(parent, tokens, SCOPE_IF, truthiness);
+
+        last_conditional_scope = if_scope;
+        parent = last_conditional_scope;
+
+        return parent;
+    }
+
+    if(keyword_type == RESERVED_ELSE){
+        if(last_conditional_scope == nullptr){
+            SAFEERROROUT(parent, SyntaxErrorElseWithoutIf, tokensToString(tokens));
+        }
+
+        parent = last_conditional_scope->getParent(); // this goes before the truthiness check because otherwise, else statements would always be set to false, no matter what
+         // If my parent is false, I must be false
+        bool truthiness = !(last_conditional_scope->getTruthiness()) && parent->getTruthiness(); // Else is always the opposite truthiness of the previous if/elsif
+        ConditionalScope* else_scope = initializeConditionalScope(parent, tokens, SCOPE_ELSE, truthiness);
+
+        last_conditional_scope = else_scope;
+        parent = last_conditional_scope;
+
+        return parent;
+    }
+
+    /********************************************/
+    if(parent->getTruthiness() == false) return parent; // This prevents yield, etc. from inside a false condition
+    
     if(keyword_type == RESERVED_YIELD){
-        if(parent->getTruthiness() == false) return parent; // This prevents yielding from inside a false condition
 
         // Escapes any yields inside if/else/elsif
         while(parent->getScopeType() != SCOPE_FUNCTION){
@@ -118,35 +152,19 @@ Scope* initializeKeyword(Scope* parent, enum ReservedKeyword keyword_type, std::
         return parent;
     }
     
-    if(keyword_type == RESERVED_IF){
+    if(keyword_type == RESERVED_TAKES){
+        if(parent->getScopeType() != SCOPE_FUNCTION){
+            SAFEERROROUT(parent, ParseErrorOrphanTakes, tokensToString(tokens));
+        }
+
         if(tokens.size() == 1){
-            SAFEERROROUT(parent, SyntaxErrorConditionalScopeWithNoCondition, tokensToString(tokens));
+            SAFEERROROUT(parent, SyntaxErrorIncompleteStatement, tokensToString(tokens));
         }
 
+        std::cout<<"Hello\n";
+        // Initializes the variables from takes
         std::vector<std::string> tokens_shifted = shiftTokens(tokens, 1);
-        Variable condition_variable = evaluateExpression(parent, tokens_shifted);
-        bool truthiness = condition_variable.getBoolean() && parent->getTruthiness(); // If my parent is false, I must be false
-        ConditionalScope* if_scope = initializeConditionalScope(parent, tokens, SCOPE_IF, truthiness);
-
-        last_conditional_scope = if_scope;
-        parent = last_conditional_scope;
-
-        return parent;
-    }
-
-    if(keyword_type == RESERVED_ELSE){
-        if(last_conditional_scope == nullptr){
-            SAFEERROROUT(parent, SyntaxErrorElseWithoutIf, tokensToString(tokens));
-        }
-
-        parent = last_conditional_scope->getParent(); // this goes before the truthiness check because otherwise, else statements would always be set to false, no matter what
-         // If my parent is false, I must be false
-        bool truthiness = !(last_conditional_scope->getTruthiness()) && parent->getTruthiness(); // Else is always the opposite truthiness of the previous if/elsif
-        ConditionalScope* else_scope = initializeConditionalScope(parent, tokens, SCOPE_ELSE, truthiness);
-
-        last_conditional_scope = else_scope;
-        parent = last_conditional_scope;
-
+        parent = buildVariableAndEvaluateExpressions(parent, tokens_shifted);
         return parent;
     }
 

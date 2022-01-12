@@ -12,6 +12,7 @@ enum ReservedKeyword{
     RESERVED_ELSIF,
 
     RESERVED_YIELD,
+    RESERVED_TAKES,
     // !!REMEMBER!! to update the Parser_Keyword.cpp unordered map!
 };
 

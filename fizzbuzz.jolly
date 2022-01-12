@@ -1,0 +1,24 @@
+# Incredibly sloppy FizzBuzz code because elsif doesn't exist yet :)
+Number counter = 0
+function FizzBuzz
+    if(counter == 50)
+       yield
+    end if
+    counter += 1
+    if counter%15 == 0
+        Println("fizzbuzz")
+        FizzBuzz()
+    end if
+    if counter%5 == 0
+        Println("buzz")
+        FizzBuzz()
+    end if
+    if counter%3 == 0
+        Println("fizz")
+        FizzBuzz()
+    end if
+    Println(counter)
+    FizzBuzz()
+end FizzBuzz
+
+FizzBuzz()

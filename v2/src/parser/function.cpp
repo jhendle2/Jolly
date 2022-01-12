@@ -14,7 +14,17 @@ Function::Function(std::string function_name, enum ObjectType return_type) : Sco
 }
 
 void Function::addParam(std::string name, Variable param){
+    params_order.add(name);
     addVariable(name, param);
+}
+std::string Function::getParamName(int id){
+    if(id > params_order.size()){
+        SAFEERROROUT(getParent(), ParseErrorUnexpectedParam, getName());
+    }
+    return params_order[id];
+}
+Variable Function::getParam(int id){
+    return getVariable(getParamName(id));
 }
 
 void Function::addLine(std::string line){

@@ -6,15 +6,10 @@
 #include "scope.hpp"
 #include "variable.hpp"
 
-// struct ParameterList{
-//     std::vector<std::string> names;
-//     std::vector<Variable> variables;
-// };
-
 class Function : public Scope{
     protected:
         enum ObjectType return_type;
-        // struct ParameterList params;
+        std::vector<std::string> params_order;
 
     public:
         Function(std::string function_name);
@@ -22,7 +17,9 @@ class Function : public Scope{
         // ~Function();
 
         void addParam(std::string name, Variable param); // initializes a variable with name function_name.variable_name & adds to variables list
-        void setParam(std::string name, Variable param);
+        // void setParam(std::string name, Variable param);
+        std::string getParamName(int id);
+        Variable getParam(int id);
         
         std::vector<std::string> unprocessed_lines;
         void addLine(std::string line); // lines to be processed later

@@ -42,6 +42,8 @@
 #define ParseErrorOrphanYield ParseError("Orphan Yield", "This yield is an orphan and lacks a parent function")
 #define ParseErrorOrphanConditionalScope ParseError("Orphan Conditional Scope", "This conditional scope lacks a parent to leave")
 #define ParseErrorCriticalScopeError ParseError("Critical Scope Error", "This scope lacked a parent and urgently needed to exit")
+#define ParseErrorOrphanTakes ParseError("Orphan Takes", "Use of {takes} keyword outside of a function")
+#define ParseErrorUnexpectedParam ParseError("Unexpected Parameter", "Supplied more parameters than function was expecting")
 
 #define RECURSIONDEPTHLIMIT 100
 #define ParseErrorRecursionLimitReached ParseError("Recursion Limit Reached", "Recursion depth has reached its max of 100")

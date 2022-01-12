@@ -8,6 +8,7 @@ std::unordered_map<std::string, enum ReservedKeyword> ParserReservedWords = {
     {"elsif", RESERVED_ELSIF},
     {"yield", RESERVED_YIELD},
     {"return", RESERVED_YIELD}, // Here Michael! Now return works also. Stinky boy!
+    {"takes", RESERVED_TAKES},
     // !!REMEMBER!! to update the Parser_Keyword.hpp enum ReservedKeyword list!
 };
 
