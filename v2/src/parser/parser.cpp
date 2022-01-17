@@ -119,6 +119,26 @@ Scope* initializeKeyword(Scope* parent, enum ReservedKeyword keyword_type, std::
         return parent;
     }
 
+    if(keyword_type == RESERVED_ENTRYPOINT){
+        if(tokens.size() == 1){
+            SAFEERROROUT(parent, SyntaxErrorIncompleteStatement, tokensToString(tokens));
+        }
+
+        std::string entrypoint_function_name = tokens[1];
+        
+        Scope* func_as_scope = parent->getScopeRecursive(entrypoint_function_name);
+        bool token_is_known_func = (func_as_scope != nullptr);
+        if(token_is_known_func){
+            Function* func = (Function*)func_as_scope;
+            std::vector<std::string> tokens_remaining = shiftTokens(tokens, 2); // drops the function name and the first parenthesis token
+            tokens_remaining.pop_back(); // drops the last parenthesis
+            Variable function_return = returnFunction(func, tokens_remaining); // Evaluates the function if it hasn't already been. This variable is thrown away
+            return parent;
+        }
+
+        return parent;
+    }
+
     /********************************************/
     if(parent->getTruthiness() == false) return parent; // This prevents yield, etc. from inside a false condition
     

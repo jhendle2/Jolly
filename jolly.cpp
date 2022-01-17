@@ -70,11 +70,12 @@ void InterpretOnePass(std::string filename){
 
 }
 
+/*
 void InterpretTwoPass(std::string filename){
 
     std::vector<std::string> file_as_lines = readFileAsLines(filename);
 
-    std::vector<struct readLinesStruct> lines_and_functions = readLinesAsLinesAndFunctions(file_as_lines);
+    std::vector<struct TokensBlock> lines_and_functions = readLinesAsLinesAndFunctions(file_as_lines);
 
     // for(readLinesStruct lines : lines_and_functions){
     //     std::cout<<"\n"<<(lines.is_function?"FUNC":"NOT A FUNC")<<"\n";
@@ -90,7 +91,8 @@ void InterpretTwoPass(std::string filename){
     Scope* main_scope = new Scope("file."+scope_name);
     main_scope->setMainScope(); // TODO: For setting up global variables
     Scope* current_scope = main_scope;
-    for(readLinesStruct lines : lines_and_functions){
+
+    for(struct TokensBlock lines : lines_and_functions){
         if(lines.is_function){
             Function* f = new Function(lines.function_name, TYPE_BOOL);
             for(std::string line : lines.lines){
@@ -119,14 +121,75 @@ void InterpretTwoPass(std::string filename){
     // return_variable.dump();
 
     delete main_scope;
+}*/
+
+
+void Interpret(Scope** parent_scope, std::string filename){
+    
+    std::vector<std::string> file_as_lines = readFileAsLines(filename);
+    std::vector<struct TokensBlock> blocks = readLinesAsLinesAndFunctions(file_as_lines);
+
+    // Populate functions first
+    std::string scope_name = dropFileExtension(filename);
+    NOTE("Building Functions: " + scope_name);
+    Scope* file_scope = (*parent_scope); // new Scope(scope_name);
+    std::cout<<"File_Scope="<<file_scope->getName()<<"\n";
+    Scope* current_scope = file_scope;
+    std::cout<<"Current_Scope="<<file_scope->getName()<<"\n";
+    for(TokensBlock block : blocks){
+        std::cout<<"block="<<block.block_name<<"\n";
+        if(block.type == BLOCK_FUNCTION){
+            Function* f = new Function(block.block_name, TYPE_NOTHING);
+            for(std::string line : block.lines){
+                f->addLine(line);
+            }
+            addScopeToScope(current_scope, f);
+        }
+    }
+
+    NOTE("Building Variables: " + scope_name);
+    current_scope = file_scope;
+    // So functions are populated before the global vars
+    for(TokensBlock block : blocks){
+        std::cout<<"block="<<block.block_name<<"\n";
+        if(block.type == BLOCK_LINES){
+            for(std::string line : block.lines){
+                Tokens line_as_tokens = tokenizeLine(line);
+                current_scope = buildVariableAndEvaluateExpressions(current_scope, line_as_tokens);
+            }
+        }
+    }
 }
+
+void OpenAndBuildLinks(std::string filename){
+
+    Scope* linked_scopes = new Scope("linker");
+    linked_scopes->setMainScope();
+
+    std::vector<std::string> file_as_lines = readFileAsLines(filename);
+    std::vector<struct TokensBlock> blocks = readLinesAsLinesAndFunctions(file_as_lines);
+
+    // for(struct TokensBlock block : blocks){
+    //     if(block.type == BLOCK_INCLUDE){
+    //         std::string filename_ext = block.block_name + ".jolly";
+    //         Interpret(&linked_scopes, filename_ext);
+    //         continue;
+    //     }
+    // }
+
+    Interpret(&linked_scopes, filename);
+
+    delete linked_scopes;
+}
+
 
 int main(int argc, char** argv){
     NOTE("Starting Smile-Parser");
 
     std::string filename = std::string(argv[1]);
 
-    InterpretTwoPass(filename);
+    // InterpretTwoPass(filename);
+    OpenAndBuildLinks(filename);
 
     std::cout<<"\n";
     return 0;

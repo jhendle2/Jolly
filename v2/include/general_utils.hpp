@@ -3,14 +3,16 @@
 #include <string>
 #include <vector>
 
+typedef std::vector<std::string> Tokens;
+
 std::string dropFileExtension(std::string filename);
 
 bool hasQuotes(std::string s);
 std::string stripQuotes(std::string s);
 
-std::vector<std::string> shiftTokens(std::vector<std::string> tokens, int shift);
-std::string tokensToString(std::vector<std::string> tokens);
-std::string tokensToLine(std::vector<std::string> tokens);
-std::vector<std::string> tokenizeLine(std::string line);
-bool tokensIsList(std::vector<std::string> tokens);
-std::vector<std::vector<std::string>> listToListOfTokens(std::vector<std::string> tokens);
+Tokens shiftTokens(Tokens tokens, int shift);
+std::string tokensToString(Tokens tokens);
+std::string tokensToLine(Tokens tokens);
+Tokens tokenizeLine(std::string line);
+bool tokensIsList(Tokens tokens);
+std::vector<Tokens> listToListOfTokens(Tokens tokens);

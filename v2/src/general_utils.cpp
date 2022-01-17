@@ -32,8 +32,8 @@ std::string stripQuotes(std::string s){
     return s;
 }
 
-std::vector<std::string> shiftTokens(std::vector<std::string> tokens, int shift){
-    std::vector<std::string> shifted;
+Tokens shiftTokens(Tokens tokens, int shift){
+    Tokens shifted;
     int count = 0;
     for(std::string token : tokens){
         if(count>=shift) shifted.push_back(token);
@@ -42,20 +42,20 @@ std::vector<std::string> shiftTokens(std::vector<std::string> tokens, int shift)
     return shifted;
 }
 
-std::string tokensToString(std::vector<std::string> tokens){
+std::string tokensToString(Tokens tokens){
     std::string tokensAsString = "";
     for(std::string token : tokens) tokensAsString += token + " ";
     return tokensAsString;
 }
 
-std::string tokensToLine(std::vector<std::string> tokens){
+std::string tokensToLine(Tokens tokens){
     std::string tokensAsString = "";
     for(std::string token : tokens) tokensAsString += token + " ";
     return tokensAsString;
 }
 
-std::vector<std::string> tokenizeLine(std::string line){
-    std::vector<std::string> tokens;
+Tokens tokenizeLine(std::string line){
+    Tokens tokens;
     std::string temp = "";
     int line_length = line.length();
     bool inside_a_string = false;
@@ -156,7 +156,7 @@ std::vector<std::string> tokenizeLine(std::string line){
     return tokens;
 }
 
-bool tokensIsList(std::vector<std::string> tokens){
+bool tokensIsList(Tokens tokens){
     for(std::string token : tokens){
         if(token == ",")
             return true;
@@ -164,9 +164,9 @@ bool tokensIsList(std::vector<std::string> tokens){
     return false;
 }
 
-std::vector<std::vector<std::string>> listToListOfTokens(std::vector<std::string> tokens){
-    std::vector<std::vector<std::string>> list_of_token_lists;
-    std::vector<std::string> temp_tokens;
+std::vector<Tokens> listToListOfTokens(Tokens tokens){
+    std::vector<Tokens> list_of_token_lists;
+    Tokens temp_tokens;
 
     for(std::string token : tokens){
         if(token == ","){

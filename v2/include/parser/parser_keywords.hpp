@@ -13,6 +13,8 @@ enum ReservedKeyword{
 
     RESERVED_YIELD,
     RESERVED_TAKES,
+    RESERVED_ENTRYPOINT,
+    RESERVED_INCLUDE,
     // !!REMEMBER!! to update the Parser_Keyword.cpp unordered map!
 };
 

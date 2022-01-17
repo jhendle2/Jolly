@@ -1,7 +1,8 @@
-# _smile.show_tokens()
+function HelloWorld
 
-# List s
-Boolean b = True
-# s = s + b
-# Println(s)
-_smile.dump_recursive()
+    Println("Hello, World!")
+
+end HelloWorld
+
+_smile.dump()
+entrypoint HelloWorld()
