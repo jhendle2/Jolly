@@ -2,9 +2,10 @@
 
 #include "primtypes.hpp"
 #include "variable.hpp"
+#include "type.hpp"
 
 Variable::Variable(){
-    name = "null";
+    name = "constant";
     type = Prim_Nothing;
 }
 
@@ -14,7 +15,7 @@ Variable::Variable(std::string name){
 }
 
 Variable::Variable(enum PrimType type){
-    this->name = "null";
+    this->name = "constant";
     this->type = type;
 }
 
@@ -23,8 +24,12 @@ Variable::Variable(std::string name, enum PrimType type){
     this->type = type;
 }
 
-enum PrimType Variable::getType() const{
+enum PrimType Variable::getPrimType() const{
     return type;
+}
+
+Type Variable::getType() const{
+    return Type(type);
 }
 
 void Variable::setName(std::string name){
@@ -37,13 +42,13 @@ std::string Variable::getName() const{
 
 
 std::string Variable::toString(){
-    return "["+primType2Keyword(type)+"] "+name;
+    return "["+primType2Keyword(type)+"] "+name+" = "+stringValue();
 }
 
 void Variable::dumpString(){
     std::cout<<toString()<<"\n";
 }
 
-std::string Variable::stringValue(){
+std::string Variable::stringValue() const{
     return "novalue";
 }

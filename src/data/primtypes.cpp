@@ -7,7 +7,6 @@ enum PrimType keyword2PrimType(std::string keyword){
     else if (keyword==KW_STRING) return Prim_String;
     else if (keyword==KW_CHAR) return Prim_Char;
     else if (keyword==KW_NUMBER) return Prim_Number;
-    else if (keyword==KW_DECIMAL) return Prim_Decimal;
     else if (keyword==KW_LIST) return Prim_List;
     else if (keyword==KW_MAP) return Prim_Map;
     else return Prim_Invalid;
@@ -25,7 +24,6 @@ std::string primType2Keyword(enum PrimType type){
         case Prim_String: return KW_STRING;
         case Prim_Char: return KW_CHAR;
         case Prim_Number: return KW_NUMBER;
-        case Prim_Decimal: return KW_DECIMAL;
         case Prim_List: return KW_LIST;
         case Prim_Map: return KW_MAP;
         default: return "invalid";

@@ -8,12 +8,19 @@
     #define KW_STRING   "String"    // String s = "Hello"
     #define KW_CHAR     "Char"      // Char c = 'x'
     #define KW_NUMBER   "Number"    // Number n = 10
-    #define KW_DECIMAL  "Decimal"   // Decimal d = 0.523
 
     #define KW_LIST     "List"      // List(String) ls = ["Hello", "Goodbye"]
     #define KW_MAP      "Map"       // Map(String, Number) msn = {"First":1, "Second":2, "Third":3}
 
 #endif /* PRIMTYPES */
+
+
+#ifndef RESERVEDVALS
+
+    #define KW_TRUE     "True"
+    #define KW_FALSE    "False"
+
+#endif /* RESERVEDVALS */
 
 enum PrimType{
     Prim_Invalid,
@@ -23,7 +30,6 @@ enum PrimType{
     Prim_String,
     Prim_Char,
     Prim_Number,
-    Prim_Decimal,
     Prim_List,
     Prim_Map,
 };

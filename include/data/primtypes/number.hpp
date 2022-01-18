@@ -9,6 +9,7 @@ class Number : public Variable{
     
     public:
         Number(float value);
+        Number(double value);
         Number(int value);
         Number(std::string name);
         Number(std::string name, float value);
@@ -19,11 +20,11 @@ class Number : public Variable{
 
         void setValue(float value);
         void setValue(int value);
+        void setValue(double value);
         float getValue() const;
 
-        std::string toString();
-        std::string stringValue();
-        
+        std::string stringValue() const;
+
         /* Operations */
 
         void set(const Number& number);
@@ -35,10 +36,10 @@ class Number : public Variable{
         bool lessEq(const Number& number);
         bool greaterEq(const Number& number);
 
-        Number add(const Number& number);
-        Number sub(const Number& number);
-        Number mul(const Number& number);
-        Number div(const Number& number);
-        Number mod(const Number& number);
-        Number exp(const Number& number);
+        Number _add(const Number& number);
+        Number _sub(const Number& number);
+        Number _mul(const Number& number);
+        Number _div(const Number& number);
+        Number _mod(const Number& number);
+        Number _exp(const Number& number);
 };

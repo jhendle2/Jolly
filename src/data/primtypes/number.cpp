@@ -4,13 +4,17 @@
 #include "number.hpp"
 #include "errors.hpp"
 
-Number::Number(float value) : Variable("constant", Prim_Number){
+Number::Number(float value) : Variable(Prim_Number){
     show_decimal = true;
     this->value=value;
 }
-Number::Number(int value) : Variable("constant", Prim_Number){
+Number::Number(int value) : Variable(Prim_Number){
     show_decimal = false;
     this->value=value;
+}
+Number::Number(double value) : Variable(Prim_Number){
+    show_decimal = true;
+    this->value=(float)value;
 }
 Number::Number(std::string name) : Variable(name, Prim_Number){
     show_decimal = false;
@@ -38,18 +42,17 @@ void Number::setValue(float value){
 void Number::setValue(int value){
     this->value = (float)value;
 }
+void Number::setValue(double value){
+    this->value = (float)value;
+}
 float Number::getValue() const{
     return value;
 }
 
-std::string Number::toString(){
-    return "["+primType2Keyword(type)+"] "+name+" = "+stringValue();
-}
-
-std::string Number::stringValue(){
+std::string Number::stringValue() const{
     if(!show_decimal){
-        int value_int = (int)value;
-        return std::to_string(value_int);
+        int int_value = (int)value;
+        return std::to_string(int_value);
     }
     return std::to_string(value);
 }
@@ -79,25 +82,25 @@ bool Number::greaterEq(const Number& number){
     return !less(number);
 }
 
-Number Number::add(const Number& number){
+Number Number::_add(const Number& number){
     Number temp = Number(value);
     temp.setShowDecimal(show_decimal);
     temp.setValue(temp.getValue() + number.getValue());
     return temp;
 }
-Number Number::sub(const Number& number){
+Number Number::_sub(const Number& number){
     Number temp = Number(value);
     temp.setShowDecimal(show_decimal);
     temp.setValue(temp.getValue() - number.getValue());
     return temp;
 }
-Number Number::mul(const Number& number){
+Number Number::_mul(const Number& number){
     Number temp = Number(value);
     temp.setShowDecimal(show_decimal);
     temp.setValue(temp.getValue() * number.getValue());
     return temp;
 }
-Number Number::div(const Number& number){
+Number Number::_div(const Number& number){
     if(number.getValue() == 0){
         ERROROUT(ArithmeticErrorDivideByZero, name + "/" + number.getName());
     }
@@ -107,7 +110,7 @@ Number Number::div(const Number& number){
     temp.setShowDecimal(!divides_cleanly || show_decimal);
     return temp;
 }
-Number Number::mod(const Number& number){
+Number Number::_mod(const Number& number){
     if(number.getValue() == 0){
         ERROROUT(ArithmeticErrorDivideByZero, name + "%" + number.getName());
     }
@@ -117,7 +120,7 @@ Number Number::mod(const Number& number){
     temp.setValue(mod);
     return temp;
 }
-Number Number::exp(const Number& number){
+Number Number::_exp(const Number& number){
     if(value == 0 && number.getValue() == 0){
         ERROROUT(ArithmeticErrorDivideByZero, name + "^" + number.getName());
     }

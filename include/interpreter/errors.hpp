@@ -64,5 +64,7 @@
 #define WARNING(X,Y) {if(WarningsEnabled){std::cout<<X<<Y<<"\n\n";}} // Warning and doesn't cleanup or quit
 #define NOTE(DESC) std::cout<<BaseNote(DESC)<<"\n";
 
+#include "debug.hpp"
+#define ERROR(X) {std::cout<<X<<lineToString(DEBUG_last_line)<<"\n\n"; exit(EXIT_FAILURE);}
 // #include "scope.hpp"
 // void cleanup_everything(Scope* scope);
