@@ -3,22 +3,22 @@
 #include "variable.hpp"
 
 class Boolean : public Variable{
-    protected:
-        bool value;
-    
     public:
-        Boolean(bool value);
+        Boolean();
+        Boolean(bool value_boolean);
+        Boolean(const Variable& var);
         Boolean(std::string name);
-        Boolean(std::string name, bool value);
+        Boolean(std::string name, bool value_boolean);
+        Boolean(std::string name, std::string value_boolean);
 
-        void setValue(bool value);
+        void setValue(bool value_boolean);
         bool getValue() const;
-        
-        std::string stringValue() const;
 
         /* Operations */
 
-        void set(const Boolean& boolean);
+        bool hasOperation(std::string op) const;
+
+        Variable set(const Boolean& boolean);
         bool eq(const Boolean& boolean);
         bool notEq(const Boolean& boolean);
 

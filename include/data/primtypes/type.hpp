@@ -3,21 +3,19 @@
 #include "variable.hpp"
 
 class Type : public Variable{
-    protected:
-        enum PrimType value;
-        
     public:
         Type();
+        Type(const Variable& var);
         Type(std::string name);
-        Type(enum PrimType value);
-        Type(std::string name, enum PrimType value);
+        Type(enum PrimType value_type);
+        Type(std::string name, enum PrimType value_type);
 
-        void setValue(enum PrimType value);
+        void setValue(enum PrimType value_type);
         enum PrimType getValue() const;
 
-        std::string stringValue() const;
+        bool hasOperation(std::string op) const;
 
-        void set(const Type& t);
+        Variable set(const Variable& t);
         bool eq(const Type& t);
         bool notEq(const Type& t);
 };

@@ -2,6 +2,11 @@
 
 #include "tokens.hpp"
 #include "operators.hpp"
+#include "errors.hpp"
+
+bool validTokensLength(Tokens tokens){
+    return (tokens.size() > 0);
+}
 
 Tokens tokenizeLine(std::string line){
     Tokens tokens;
@@ -66,6 +71,32 @@ Tokens tokenizeLine(std::string line){
             } 
         }
 
+        else if(c == DELIM_DOT){
+            if(inside_character || inside_string){
+                temp += c;
+            }
+            else{
+                if(i > 1){
+                    if(isDigit(line[i+1])){
+                        temp += c;
+                    }
+                }
+                else if(i < (int)line.length()-1){
+                    if(isDigit(line[i+1])){
+                        temp += c;
+                    }
+                }
+                else{
+                    if(temp != ""){
+                        tokens.push_back(temp);
+                        temp = "";
+                    }
+                    temp += c;
+                    goto ADD_TOKEN;
+                }
+            }
+        }
+
         else if(isDelimiter(c)){
             if(inside_character || inside_string){
                 temp += c;
@@ -104,4 +135,14 @@ std::string tokensToString(Tokens tokens){
         out += "[" + token + "] ";
     }
     return out;
+}
+
+Tokens shiftTokens(Tokens tokens, int shift){
+    Tokens shifted;
+    int count = 0;
+    for(std::string token : tokens){
+        if(count>=shift) shifted.push_back(token);
+        count++;
+    }
+    return shifted;
 }

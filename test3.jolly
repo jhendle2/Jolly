@@ -1,0 +1,5 @@
+
+Number n = 0
+while n < 10
+    Println("Hi")
+end while

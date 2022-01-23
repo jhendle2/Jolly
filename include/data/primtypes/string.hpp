@@ -9,29 +9,33 @@
 class Character;
 
 class String : public Variable{
-    protected:
-        std::string value;
-
     public:
         String();
-        String(std::string value);
-        String(std::string name, char value);
-        String(std::string name, std::string value);
+        String(const Variable& var);
+        String(std::string value_string);
+        String(std::string name, char value_string);
+        String(std::string name, std::string value_string);
             
-        void setValue(char value);
-        void setValue(std::string value);
+        void setValue(char value_string);
+        void setValue(std::string value_string);
         std::string getValue() const;
-
-        std::string stringValue() const;
 
         /* Operations */
 
-        void set(const String& string);
-        bool eq(const String& string);
-        bool notEq(const String& string);
+        bool hasOperation(std::string op) const;
+
+        Variable set(const Variable& var);
+        bool eq(const Variable& var);
+        bool notEq(const Variable& var);
         Number _len();
 
+        bool _less(const String& string);
+        bool _lessEq(const String& string);
+        bool _greater(const String& string);
+        bool _greaterEq(const String& string);
+
         String _add(const String& string);
+        String _mul(const Number& number);
         String cat(const String& string);
         String cat(const Character& character);
         String cat(const Boolean& boolean);

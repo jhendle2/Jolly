@@ -1,59 +1,96 @@
-#include "string.hpp"
-#include "utils.hpp"
-
 #include <iostream>
 
+#include "string.hpp"
+#include "utils.hpp"
+#include "operators.hpp"
+
 String::String() : Variable(Prim_String){
-    value = "";
+    value_string = "";
+}
+
+String::String(const Variable& var) : Variable(var.getName(), Prim_String){
+    value_string = var.stringValue();
 }
 
 String::String(std::string name) : Variable(name, Prim_String){
-    value = "";
+    value_string = "";
 }
 
-String::String(std::string name, char value) : Variable(name, Prim_String){
-    std::string str_char{value};
-    this->value = str_char;
+String::String(std::string name, char value_string) : Variable(name, Prim_String){
+    std::string str_char{value_string};
+    this->value_string = str_char;
 }
 
-String::String(std::string name, std::string value) : Variable(name, Prim_String){
-    this->value = removeDoubleQuotes(value);
+String::String(std::string name, std::string value_string) : Variable(name, Prim_String){
+    this->value_string = removeDoubleQuotes(value_string);
 }
 
-void String::setValue(char value){
-    std::string str_value{value};
-    this->value = str_value;
+void String::setValue(char value_string){
+    std::string str_value_string{value_string};
+    this->value_string = str_value_string;
 }
-void String::setValue(std::string value){
-    this->value = removeDoubleQuotes(value);
+void String::setValue(std::string value_string){
+    this->value_string = removeDoubleQuotes(value_string);
 }
 std::string String::getValue() const{
-    return value;
-}
-
-std::string String::stringValue() const{
-    return value;
+    return value_string;
 }
 
 /* Operations */
 
-void String::set(const String& string){
-    this->value = string.getValue();
+bool String::hasOperation(std::string op) const{
+    return(
+        op == OP_EQ ||
+        op == OP_EQUALITY ||
+        op == OP_INEQUALITY ||
+        op == OP_ADD ||
+        op == OP_CAT
+    );
 }
-bool String::eq(const String& string){
-    return (value == string.getValue());
+
+Variable String::set(const Variable& var){
+    this->value_string = var.stringValue();
+    String out = String(name, value_string);
+    return out;
 }
-bool String::notEq(const String& string){
-    return !eq(string);
+bool String::eq(const Variable& var){
+    return (value_string == var.stringValue());
+}
+bool String::notEq(const Variable& var){
+    return !eq(var);
 }
 Number String::_len(){
-    int length = (int)value.length();
+    int length = (int)value_string.length();
     return Number(length);
 }
 
+bool String::_less(const String& string){
+    return (value_string.length() < string.getValueString().length());
+}
+
+bool String::_greater(const String& string){
+    return (value_string.length() > string.getValueString().length());
+}
+bool String::_lessEq(const String& string){
+    return (value_string.length() <= string.getValueString().length());
+}
+
+bool String::_greaterEq(const String& string){
+    return (value_string.length() >= string.getValueString().length());
+}
+
 String String::_add(const String& string){
-    String out = String("constant");
-    out.setValue(value + string.getValue());
+    String out = String("constant", "");
+    out.setValue(value_string + string.getValue());
+    return out;
+}
+String String::_mul(const Number& number){
+    String out = String("constant", "");
+    std::string mul_string = value_string;
+    for(int i = 0; i<number.getValueNumber(); i++){
+        mul_string += value_string;
+    }
+    out.setValue(mul_string);
     return out;
 }
 String String::cat(const String& string){

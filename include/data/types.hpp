@@ -7,3 +7,4 @@
 #include "character.hpp"
 #include "string.hpp"
 #include "type.hpp"
+#include "scope.hpp"

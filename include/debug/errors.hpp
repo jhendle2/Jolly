@@ -25,6 +25,7 @@
 #define SyntaxErrorReinitializedVariable SyntaxError("Reinitialized Variable", "Variable was reinitialized twice!")
 #define SyntaxErrorConditionalScopeWithNoCondition SyntaxError("Conditional Scope Lacking Condition", "This conditional scope lacks any sort of boolean value")
 #define SyntaxErrorElseWithoutIf SyntaxError("Else without If or Elsif", "This else lacks a friend :(")
+#define SyntaxErrorBadName SyntaxError("Bad Name", "This name is not applicable for the given object")
 
 /* Syntax Warnings */
 #define SyntaxWarningUnknownVariable BaseWarning("Unknown Variable", "This variable is unknown and will be initialized to Nothing")
@@ -32,6 +33,7 @@
 /* Arithmetic Errors */
 #define ArithmeticErrorDivideByZero ArithmeticError("Divide By Zero", "Cannot divide by zero")
 #define ArithmeticErrorIncompatibleTypes SyntaxError("Incompatible Types", "Cannot perform specified arithmetic operation between types")
+#define ArithmeticErrorBadOperation SyntaxError("Bad Operation", "Cannot combine two elements")
 
 /* Parse Errors */
 #define ParseErrorUnrecognizedVariable ParseError("Unrecognized Variable", "Parser encountered an empty variable name")
@@ -42,6 +44,9 @@
 #define ParseErrorOrphanYield ParseError("Orphan Yield", "This yield is an orphan and lacks a parent function")
 #define ParseErrorOrphanConditionalScope ParseError("Orphan Conditional Scope", "This conditional scope lacks a parent to leave")
 #define ParseErrorCriticalScopeError ParseError("Critical Scope Error", "This scope lacked a parent and urgently needed to exit")
+#define ParseErrorScopeDoesNotExist ParseError("Critical Scope Error", "Attempted an operation with a scope that does not exist")
+#define ParseErrorScopeNotFunction ParseError("Scope Not a Function", "Attempted to perform functional operations on a non-function scope")
+#define ParseErrorMissingParameter ParseError("Missing Parameter", "Parameter at this index does not exist")
 
 #define RECURSIONDEPTHLIMIT 100
 #define ParseErrorRecursionLimitReached ParseError("Recursion Limit Reached", "Recursion depth has reached its max of 100")
@@ -62,9 +67,9 @@
 #define CLEANUPEVERYTHING(PARENT) cleanup_everything(PARENT)
 #define SAFEERROROUT(PARENT,X,Y) {std::cout<<X<<Y<<"\n\n"; CLEANUPEVERYTHING(PARENT); exit(EXIT_FAILURE);} // Exits but also frees all remaining scopes, vars, etc.
 #define WARNING(X,Y) {if(WarningsEnabled){std::cout<<X<<Y<<"\n\n";}} // Warning and doesn't cleanup or quit
-#define NOTE(DESC) std::cout<<BaseNote(DESC)<<"\n";
+#define TITLE(DESC) std::cout<<BaseNote(DESC)<<"\n\n";
 
 #include "debug.hpp"
-#define ERROR(X) {std::cout<<X<<lineToString(DEBUG_last_line)<<"\n\n"; exit(EXIT_FAILURE);}
+#define ERROR(X) { delete DEBUG_last_scope; std::cout<<X<<lineToString(DEBUG_last_line)<<"\n\n"; exit(EXIT_FAILURE);}
 // #include "scope.hpp"
 // void cleanup_everything(Scope* scope);

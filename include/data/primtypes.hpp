@@ -5,8 +5,10 @@
     #define KW_NOTHING  "Nothing"   // Nothing m
     #define KW_TYPE     "Type"      // Type t = Bool
     #define KW_BOOLEAN  "Bool"      // Bool b = True
+    #define KW_BOOLEAN_ALT "Boolean"// Boolean b = True
     #define KW_STRING   "String"    // String s = "Hello"
     #define KW_CHAR     "Char"      // Char c = 'x'
+    #define KW_CHAR_ALT "Character" // Character c = 'x'
     #define KW_NUMBER   "Number"    // Number n = 10
 
     #define KW_LIST     "List"      // List(String) ls = ["Hello", "Goodbye"]

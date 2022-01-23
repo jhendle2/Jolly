@@ -7,24 +7,25 @@
 class String; // Forward declared so the 'cat' function works
 
 class Character : public Variable{
-    protected:
-        char value;
-    
     public:
-        Character(char value);
+        Character();
+        Character(char value_character);
+        Character(const Variable& var);
         Character(std::string name);
-        Character(std::string name, char value);
-        Character(std::string name, std::string value);
+        Character(std::string name, char value_character);
+        Character(std::string name, std::string value_character);
+        Character(std::string name, int value_character);
+        Character(std::string name, float value_character);
 
-        void setValue(char value);
-        void setValue(std::string value);
+        void setValue(char value_character);
+        void setValue(std::string value_character);
         char getValue() const;
-
-        std::string stringValue() const;
 
         /* Operations */
 
-        void set(const Character& character);
+        bool hasOperation(std::string op) const;
+
+        Variable set(const Variable& var);
         bool eq(const Character& character);
         bool notEq(const Character& character);
 
@@ -39,4 +40,5 @@ class Character : public Variable{
         Character _sub(const Number& number);
 
         String cat(const Character& character);
+        String cat(const String& string);
 };

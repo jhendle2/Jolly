@@ -1,14 +1,4 @@
-
-String s = "Hello"
-
-function func1
-    String t = "Goodbye"
-end func1
-
-function func2
-    Number a
-    Number b
-    Number c
-end func2
-
-String z = "Peace"
+Number n1 = 50
+Number n2 = 10
+Bool blss = n1 < n2
+Bool bgtr = n1 > n2

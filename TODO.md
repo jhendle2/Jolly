@@ -1,4 +1,4 @@
-#TODO#
+<!-- #TODO#
 
 * Strings aren't taking "" as initializers, or rather "" (& probably '' by extension) aren't working in general.
 And also this isn't working...
@@ -16,4 +16,6 @@ And also this isn't working...
 * Fix and= or= xor= operators
 
 * Add boolean operator symbols instead of just words
-* Add not operator
+* Add not operator -->
+
+OLD
