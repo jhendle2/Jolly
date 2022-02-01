@@ -1,24 +1,27 @@
-# Incredibly sloppy FizzBuzz code because elsif doesn't exist yet :)
-Number counter = 0
-function FizzBuzz
-    if(counter == 100)
-       yield
-    end if
-    counter += 1
-    if counter%15 == 0
-        Println("fizzbuzz")
-        FizzBuzz()
-    end if
-    if counter%5 == 0
-        Println("buzz")
-        FizzBuzz()
-    end if
-    if counter%3 == 0
-        Println("fizz")
-        FizzBuzz()
-    end if
-    Println(counter)
-    FizzBuzz()
-end FizzBuzz
 
-FizzBuzz()
+# function isPythagorean
+
+#     takes Number A
+#     takes Number B
+
+#     return ( A ^ 2.0 + B ^ 2.0 ) ^ ( 1/2 )
+
+# end isPythagorean
+
+# Number C = isPythagorean(3, 4)
+# Println(C)
+
+function isDecimal
+
+    takes Number x
+    
+    Println(x)
+
+    Println(x * 10)
+
+end isDecimal
+
+isDecimal(1.2)
+isDecimal(5)
+
+# PARAMETERS AREN'T BEING RELOADED FOR SOME REASON???

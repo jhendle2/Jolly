@@ -1,132 +1,79 @@
 #include <iostream>
 #include <string>
 #include <vector>
+#include <unordered_map>
 
-#include "file_manager.hpp"
-#include "general_utils.hpp"
+#include "debug.hpp"
 #include "errors.hpp"
+#include "logging.hpp"
+#include "utils.hpp"
+#include "file_reader.hpp"
+#include "types.hpp"
+#include "tokens.hpp"
 
-#include "object.hpp"
-#include "variable.hpp"
-#include "boolean.hpp"
-#include "character.hpp"
-#include "number.hpp"
-#include "string.hpp"
-
+#include "function_builder.hpp"
 #include "function.hpp"
-#include "object_table.hpp"
-#include "parser.hpp"
+#include "interpreter.hpp"
 
-// void _Test_Function(){
+void Interpret(std::string filename){
+    LOGNOTE("Interpretering \"" + filename + "\"");
+
+    struct FunctionsLinesPair functions_lines_pair = LocateFunctionsAndLines(filename);
     
-//     Scope* main_scope = new Scope("mainScope");
-//     Function* f = new Function("test_function", TYPE_BOOL);
-//     f->addLine("function test_function");
-//     f->addLine("String s = \"Hello, World\"");
-//     f->addLine("Character z = \'!\'");
-//     f->addLine("s += z");
-//     f->addLine("Println(s)");
-//     f->addLine("yield s");
-//     f->addLine("end test_function");
+    std::vector<Tokens> lines_as_tokens = functions_lines_pair.lines_as_tokens;
+    std::vector<struct Line> file_as_lines = functions_lines_pair.file_as_lines;
+    std::unordered_map<std::string, struct FunctionBlock> functions = functions_lines_pair.functions;
 
-//     f->dump();
-    
-//     std::cout<<"AddScopeToScope\n";
-//     addScopeToScope(main_scope, f);
-
-//     std::cout<<"Now to Return\n";
-//     Variable return_variable = returnFunction(f);
-
-//     std::cout<<"Taking a Dump\n";
-//     f->dumpRecursive();
-//     std::cout<<"\n\n";
-//     return_variable.dump();
-
-// }
-
-void InterpretOnePass(std::string filename){
-
-    std::vector<std::string> file_as_lines = readFileAsLines(filename);
-
-    for(std::string line : file_as_lines){
-        std::cout<< line <<"\n";
-    }
-
-    Scope* main_scope = new Scope("mainScope");
+    Scope* main_scope = new Scope(dropExtension(filename));
     Scope* current_scope = main_scope;
-    for(std::string line : file_as_lines){
-        std::vector<std::string> lineAsTokens = tokenizeLine(line);
-        // for(std::string token : lineAsTokens){
-        //     std::cout<<"["<<token<<"] ";
-        // }
-        // std::cout<<"\n";
-        
-        current_scope = buildVariableAndEvaluateExpressions(current_scope, lineAsTokens);
-        // std::cout<<"$$$$$$$$$$$$$$$$$$$$$$$$$"<<current_scope->getName()<<"\n";
+
+    for(auto pair : functions){
+        std::string function_name = pair.first;
+        Function* func = new Function(function_name);
+        func->setLines(pair.second);
+        addScopeToScope(current_scope, func);
     }
 
-    // std::cout<<"\n\n\n";
-    // main_scope->dumpRecursive();
-
-}
-
-void InterpretTwoPass(std::string filename){
-
-    std::vector<std::string> file_as_lines = readFileAsLines(filename);
-
-    std::vector<struct readLinesStruct> lines_and_functions = readLinesAsLinesAndFunctions(file_as_lines);
-
-    // for(readLinesStruct lines : lines_and_functions){
-    //     std::cout<<"\n"<<(lines.is_function?"FUNC":"NOT A FUNC")<<"\n";
-    //     for(std::string line : lines.lines){
-    //         std::cout<< line <<"\n";
-    //     }
-    //     std::cout<<"\n###############\n\n";
-    // }
-
-    // Populate functions first
-    std::string scope_name = dropFileExtension(filename);
-    NOTE("Building Functions: " + scope_name);
-    Scope* main_scope = new Scope("file."+scope_name);
-    main_scope->setMainScope(); // TODO: For setting up global variables
-    Scope* current_scope = main_scope;
-    for(readLinesStruct lines : lines_and_functions){
-        if(lines.is_function){
-            Function* f = new Function(lines.function_name, TYPE_BOOL);
-            for(std::string line : lines.lines){
-                f->addLine(line);
-            }
-            addScopeToScope(current_scope, f);
-        }
-    }
-
-    NOTE("Building Variables: " + scope_name);
     current_scope = main_scope;
-    // So functions are populated before the global vars
-    for(readLinesStruct lines : lines_and_functions){
-        if(!lines.is_function){
-            for(std::string line : lines.lines){
-                std::vector<std::string> lineAsTokens = tokenizeLine(line);
-                current_scope = buildVariableAndEvaluateExpressions(current_scope, lineAsTokens);
-            }
-        }
+    int index = 0;
+    for(Tokens token_line : lines_as_tokens){
+        DEBUG_last_line = file_as_lines[index++];
+        interpret_tokens(current_scope, token_line); 
     }
 
-    // main_scope->dumpRecursive();
-
-    // Function* f = (Function*)main_scope->getScope("file.test2.func1");
-    // Variable return_variable = returnFunction(f);
-    // return_variable.dump();
+    if(LOGLEVEL == LOGLEVELDEBUG) main_scope->dumpRecursive();
 
     delete main_scope;
 }
 
 int main(int argc, char** argv){
-    NOTE("Starting Smile-Parser");
+    LOGLEVEL = LOGLEVELNONE;
+    if(LOGLEVEL > LOGLEVELNONE) TITLE("Starting Smile-Parser");
 
-    std::string filename = std::string(argv[1]);
+    // Set up our command line flags
+    std::string filename = "";
+    for(int i = 0; i<argc; i++){
+        std::string flag = argv[i];
 
-    InterpretTwoPass(filename);
+        if(flag == "--note") LOGLEVEL = LOGLEVELNOTE;
+        else if(flag == "--error") LOGLEVEL = LOGLEVELERROR;
+        else if(flag == "--warning") LOGLEVEL = LOGLEVELWARNING;
+        else if(flag == "--debug") LOGLEVEL = LOGLEVELDEBUG;
+
+        if(endsInJollyExtension(flag)){
+            filename = flag;
+        }
+    }
+
+    // As long as we were supplied a file, we should interpret it
+    if(filename != ""){
+        Interpret(filename);
+    }
+    else{
+        LOGERROR("No files to process!");
+    }
+
+    if(LOGLEVEL > LOGLEVELNONE) TITLE("All done.");
 
     std::cout<<"\n";
     return 0;

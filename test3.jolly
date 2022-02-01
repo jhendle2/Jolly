@@ -1,0 +1,24 @@
+
+function Fibonacci
+
+    takes Number N
+
+    Number a = 1
+    Number b = 1
+    Number c = 0
+
+    Println(a)
+    Println(b)
+
+    while c < N
+
+        c = a + b
+        a = b
+        b = c
+        Println(c)
+
+    end while
+
+end Fibonacci
+
+Fibonacci(1000)
