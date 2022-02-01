@@ -96,9 +96,9 @@ Variable evaluateExpression(Scope*& current_scope, Tokens tokens){
     std::stack<std::string> operators;
 
     for(int i = 0; i<(int)tokens.size(); i++){
-        if(LOGLEVEL == LOGLEVELDEBUG){
-            std::cout<<"ee-tok ["<<i<<"] = "<<tokens[i]<<"\n";
-        }
+        // if(LOGLEVEL == LOGLEVELDEBUG){
+        //     std::cout<<"ee-tok ["<<i<<"] = "<<tokens[i]<<"\n";
+        // }
 
         if(tokens[i] ==  "") continue;
 

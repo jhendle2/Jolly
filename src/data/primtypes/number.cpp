@@ -181,7 +181,7 @@ Number Number::_exp(const Number& number){
     }
     Number temp = Number(value_number);
     temp.setShowDecimal(value_number_show_decimal);
-    int exp_value_number = pow((int)temp.getValue(), (int)number.getValue());
+    double exp_value_number = pow(temp.getValue(), number.getValue());
     temp.setValue(exp_value_number);
     return temp;
 }

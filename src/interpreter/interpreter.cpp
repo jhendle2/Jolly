@@ -4,6 +4,7 @@
 
 #include "variable.hpp"
 #include "function.hpp"
+#include "loop.hpp"
 
 #include "keywords.hpp"
 #include "operators.hpp"
@@ -81,6 +82,15 @@ static void processKeyword(Scope*& current_scope, Tokens tokens){
     }
 }
 
+static void processLoop(Scope*& current_scope, Tokens tokens){
+    // If we aren't currently building a loop, let's make a new one
+    Loop* new_loop = new Loop(tokenToLoopType(tokens[0]));
+    Tokens condition = shiftTokens(tokens, 1); // Keeps the condition expression
+    new_loop->setLoopCondition(condition);
+    addScopeToScope(current_scope, new_loop);
+    current_scope = new_loop;
+}
+
 static void processConditional(Scope*& current_scope, Tokens tokens){
     static Scope* last_conditional_scope = nullptr;
     static int last_conditional_id = 0;
@@ -109,11 +119,11 @@ static void processConditional(Scope*& current_scope, Tokens tokens){
         ERROR(ParseErrorOrphanConditionalScope);
     }
 
-    if(tokens.size() > 1 && tokens[0] == KW_ELSIF){
+    if(tokens.size() > 1 && tokens[0] == KW_ELSIF){ // TODO: IMPLEMENT
         if(current_scope->getTruthiness() == false) return;
     }
 
-    if(tokens[0] == KW_ELSE){
+    if(tokens[0] == KW_ELSE){ // TODO: IMPLEMENT
         if(current_scope->getTruthiness() == false) return;
     }
     
@@ -165,6 +175,8 @@ static void _println(Scope*& current_scope, Tokens tokens){
 }
 
 void interpret_tokens(Scope*& current_scope, Tokens tokens){
+    static bool building_a_loop = false;
+
     // Check we don't have a nullptr scope
     checkNullScope(current_scope);
 
@@ -180,9 +192,34 @@ void interpret_tokens(Scope*& current_scope, Tokens tokens){
     // Check we don't have 0 tokens
     if(!validTokensLength(tokens)) return;
 
+    // Finish Building a loop
+    if(tokens.size() > 0 && tokens[0] == KW_END && isLoopType(tokens[1])){
+        building_a_loop = false;
+        Loop* current_scope_as_loop = (Loop*)(current_scope);
+        current_scope_as_loop->addLine(tokens); // adds that LOOP END line before evaluating
+        evaluateLoop(current_scope_as_loop);
+        current_scope = current_scope_as_loop->getParent();
+        return;
+    }
+
+    // Begin Building a loop
+    if(isLoopType(tokens[0])){
+        building_a_loop = true;
+        processLoop(current_scope, tokens);
+        return;
+    }
+
+    // Add lines to a loop
+    if(building_a_loop){
+        Loop* current_scope_as_loop = (Loop*)(current_scope);
+        current_scope_as_loop->addLine(tokens);
+        return;
+    }
+
     // If/Elsif/Else checker
     if(isConditional(tokens)){
         processConditional(current_scope, tokens);
+        return;
     }
 
     // If the scope is false, don't do it
@@ -191,6 +228,7 @@ void interpret_tokens(Scope*& current_scope, Tokens tokens){
     // Other Keywords
     if(isKeyword(tokens[0])){
         processKeyword(current_scope, tokens);
+        return;
     }
 
     // Elementary print handling

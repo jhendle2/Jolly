@@ -1,0 +1,8 @@
+
+Number n = 0
+Number m = 0
+
+while n < 10
+    Println("Loop 1")
+    n += 1
+end while

@@ -1,4 +1,27 @@
-Number n1 = 50
-Number n2 = 10
-Bool blss = n1 < n2
-Bool bgtr = n1 > n2
+
+# function isPythagorean
+
+#     takes Number A
+#     takes Number B
+
+#     return ( A ^ 2.0 + B ^ 2.0 ) ^ ( 1/2 )
+
+# end isPythagorean
+
+# Number C = isPythagorean(3, 4)
+# Println(C)
+
+function isDecimal
+
+    takes Number x
+    
+    Println(x)
+
+    Println(x * 10)
+
+end isDecimal
+
+isDecimal(1.2)
+isDecimal(5)
+
+# PARAMETERS AREN'T BEING RELOADED FOR SOME REASON???

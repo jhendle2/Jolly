@@ -21,6 +21,10 @@
     #define KW_YIELDS_ALT   "outputs"
 
     #define KW_WHILE    "while"
+    #define KW_DOWHILE    "dowhile"
+    #define KW_FOR    "for"
+    #define KW_FOREACH    "foreach"
+    #define KW_COUNT    "count"
 
 #endif /* KEYWORDS */
 
