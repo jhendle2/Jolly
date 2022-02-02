@@ -1,8 +1,9 @@
-#include "file_reader.hpp"
-
+#include <iostream>
 #include <algorithm>
 #include <iostream>
 #include <fstream>
+
+#include "file_reader.hpp"
 
 static void removeComments(std::string& in){
     int comment_index = in.find('#');
@@ -35,10 +36,11 @@ std::string lineToString(struct Line line){
     return out;
 }
 
-std::vector<struct Line> readFileAsLines(std::string filename){
-    std::vector<struct Line> lines;
+
+std::vector<Line> readFileAsLines(std::string file_path){
+    std::vector<Line> lines;
     std::fstream newfile;
-    newfile.open(filename,std::ios::in); //open a file to perform read operation using file object
+    newfile.open(file_path, std::ios::in); //open a file to perform read operation using file object
     if (newfile.is_open()){   //checking whether the file is open
         std::string tp;
         int line_number = 1;
@@ -66,5 +68,5 @@ std::vector<struct Line> readFileAsLines(std::string filename){
         }
         newfile.close(); //close the file object.
     }
-    return lines;   
+    return lines;
 }

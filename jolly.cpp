@@ -1,80 +1,36 @@
 #include <iostream>
 #include <string>
+#include <memory>
 #include <vector>
-#include <unordered_map>
 
-#include "debug.hpp"
-#include "errors.hpp"
-#include "logging.hpp"
-#include "utils.hpp"
 #include "file_reader.hpp"
-#include "types.hpp"
-#include "tokens.hpp"
+#include "tokens_lines.hpp"
+#include "scope.hpp"
 
-#include "function_builder.hpp"
-#include "function.hpp"
-#include "interpreter.hpp"
+static void processFile(std::string file_path){
+    std::vector<Line> file_as_lines = readFileAsLines(file_path);
 
-void Interpret(std::string filename){
-    LOGNOTE("Interpretering \"" + filename + "\"");
-
-    struct FunctionsLinesPair functions_lines_pair = LocateFunctionsAndLines(filename);
-    
-    std::vector<Tokens> lines_as_tokens = functions_lines_pair.lines_as_tokens;
-    std::vector<struct Line> file_as_lines = functions_lines_pair.file_as_lines;
-    std::unordered_map<std::string, struct FunctionBlock> functions = functions_lines_pair.functions;
-
-    Scope* main_scope = new Scope(dropExtension(filename));
-    Scope* current_scope = main_scope;
-
-    for(auto pair : functions){
-        std::string function_name = pair.first;
-        Function* func = new Function(function_name);
-        func->setLines(pair.second);
-        addScopeToScope(current_scope, func);
+    for(auto line : file_as_lines){
+        std::cout << "(" << line.line_number << ") " << line.line << "\n";
     }
-
-    current_scope = main_scope;
-    int index = 0;
-    for(Tokens token_line : lines_as_tokens){
-        DEBUG_last_line = file_as_lines[index++];
-        interpret_tokens(current_scope, token_line); 
-    }
-
-    if(LOGLEVEL == LOGLEVELDEBUG) main_scope->dumpRecursive();
-
-    delete main_scope;
 }
 
 int main(int argc, char** argv){
-    LOGLEVEL = LOGLEVELNONE;
-    if(LOGLEVEL > LOGLEVELNONE) TITLE("Starting Smile-Parser");
+    std::cout << "\nJolly v0.0.6\n\n";
 
-    // Set up our command line flags
-    std::string filename = "";
-    for(int i = 0; i<argc; i++){
-        std::string flag = argv[i];
+    // std::shared_ptr<Scope> master_scope = Scope::create("master", ScopeFunction);
+    // std::shared_ptr<Scope> child_scope = Scope::create("child", ScopeWhile);
+    // std::shared_ptr<Scope> child2_scope = Scope::create("child2", ScopeWhile);
+    // std::shared_ptr<Scope> child3_scope = Scope::create("child3", ScopeWhile);
 
-        if(flag == "--note") LOGLEVEL = LOGLEVELNOTE;
-        else if(flag == "--error") LOGLEVEL = LOGLEVELERROR;
-        else if(flag == "--warning") LOGLEVEL = LOGLEVELWARNING;
-        else if(flag == "--debug") LOGLEVEL = LOGLEVELDEBUG;
+    // master_scope->addChild(child_scope);
+    // child_scope->addChild(child2_scope);
+    // master_scope->addChild(child3_scope);
 
-        if(endsInJollyExtension(flag)){
-            filename = flag;
-        }
-    }
+    // master_scope->tree(0);
 
-    // As long as we were supplied a file, we should interpret it
-    if(filename != ""){
-        Interpret(filename);
-    }
-    else{
-        LOGERROR("No files to process!");
-    }
-
-    if(LOGLEVEL > LOGLEVELNONE) TITLE("All done.");
+    processFile(argv[1]);
 
     std::cout<<"\n";
-    return 0;
+    return EXIT_SUCCESS;
 }
