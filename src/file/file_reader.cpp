@@ -17,6 +17,14 @@ static void removeNewLine(std::string& in){
     in.erase(std::remove(in.begin(), in.end(), '\r'), in.end());
 }
 
+static void removeSpaces(std::string& in){
+    int i;
+    for(i = 0; i<(int)in.length(); i++){
+        if(in.at(i) != '\t' && in.at(i) != ' ') break;
+    }
+    in = in.substr(i);
+}
+
 static bool lastCharacterIsLineExtension(std::string in){
     if(in.length() == 0) return false;
     if(in.at(in.length()-1)=='\\') return true;
@@ -48,6 +56,7 @@ std::vector<Line> readFileAsLines(std::string file_path){
         while(getline(newfile, tp)){ //read data from file object and put it into string.
             removeNewLine(tp);
             removeComments(tp);
+            removeSpaces(tp);
 
             if(!isBlankLine(tp)){
                 if(last_line_had_line_extension){

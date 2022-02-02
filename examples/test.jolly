@@ -2,7 +2,7 @@
 with Print from StandardLibrary
 
 function Main yields Nothing # with an inline comment
-    Print("Hello World");
+    Print("Hello World")
 end Main
    
 entrypoint Main

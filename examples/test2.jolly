@@ -1,0 +1,19 @@
+
+function A
+    
+    Print("A")
+
+    if X
+        Print("X")
+        if X2
+            Print("X2")
+        end if
+    elsif Y
+        Print("Y")
+    else
+        Print("Z")
+    end if
+
+    Print("B")
+
+end A

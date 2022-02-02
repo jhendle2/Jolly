@@ -9,10 +9,23 @@
 enum ScopeType{
     ScopeInvalid,
 
-    ScopeWhile,
+    ScopeConstant,
+    ScopeClass,
     ScopeFunction,
+
+    ScopeWhile,
+    ScopeDowhile,
+    ScopeFor,
+    ScopeForeach,
+    ScopeCount,
+
+    ScopeIf,
+    ScopeElsif,
+    ScopeElse,
 };
 
+bool isScopeType(const std::string& s);
+enum ScopeType stringToScopeType(const std::string& s);
 std::string scopeTypeToString(const enum ScopeType& type);
 
 /********************************/
@@ -39,8 +52,12 @@ public:
     std::string getName() const;
     enum ScopeType getScopeType() const;
 
+    void addLine(Line line);
+    std::vector<Line> getLines() const;
+
     void dump() const;
     void dumpRecursive() const;
+    void tree();
     void tree(int level);
 
     void setParent(std::shared_ptr<Scope> parent);
@@ -48,3 +65,5 @@ public:
 
     void addChild(std::shared_ptr<Scope> child);
 };
+
+typedef std::shared_ptr<Scope> ScopePtr;
