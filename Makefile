@@ -1,5 +1,5 @@
 # INLCLUDES=-I./include/ -I./include/data/ -I./include/data/primtypes/ -I./include/file/ -I./include/utils/ -I./include/interpreter/ -I./include/debug/
-INLCLUDES=-I./include/ -I./include/file/ -I./include/parser/
+INLCLUDES=-I./include/ -I./include/file/ -I./include/parser/ -I./include/data/ -I./include/debug/
 SRC=src/*/*.cpp
 # src/*/*/*cpp
 
@@ -9,7 +9,7 @@ build:
 
 test:
 	make build
-	./jolly ./examples/test2.jolly
+	./jolly --debug ./examples/test2.jolly
 
 t:
 	g++ -g -Wall -o test test.cpp

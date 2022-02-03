@@ -1,19 +1,8 @@
 
-function A
-    
-    Print("A")
+class HelloWorld
 
-    if X
-        Print("X")
-        if X2
-            Print("X2")
-        end if
-    elsif Y
-        Print("Y")
-    else
-        Print("Z")
-    end if
+    Print("Hello, World!")
 
-    Print("B")
+end HelloWorld
 
-end A
+entrypoint HelloWorld

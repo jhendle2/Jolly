@@ -39,7 +39,7 @@ static bool isBlankLine(std::string in){
     } return true;
 }
 
-std::string lineToString(struct Line line){
+std::string lineToString(Line line){
     std::string out = std::to_string(line.line_number) + " - " + line.line;
     return out;
 }
@@ -78,4 +78,38 @@ std::vector<Line> readFileAsLines(std::string file_path){
         newfile.close(); //close the file object.
     }
     return lines;
+}
+
+// Isolates a file_name from a larger file_path
+// ex: dir/test.jolly -> test
+std::string fileName(std::string file_path){
+    if(file_path.length() < 2) return "invalid_name";
+
+    file_path = file_path.substr(0, file_path.find(".jolly"));
+
+    int i;
+    for(i = file_path.length() - 1; i >= 0; i--){
+        char atchar = file_path.at(i);
+        
+        // We hit a directory
+        if(atchar == '/'){
+            i++;
+            break;
+        }
+
+    }
+
+    return file_path.substr(i);
+}
+
+bool endsInJollyExtension(const std::string& str_in){
+    std::string extension = ".jolly";
+    int extension_length = (int)extension.length();
+    if((int)str_in.length() < (extension_length + 1)) return false;
+
+    int start_index = str_in.length() - extension_length;
+    int end_index = str_in.length();
+    std::string str_in_substr = str_in.substr(start_index, end_index);
+    if(str_in_substr == extension) return true;
+    return false;
 }

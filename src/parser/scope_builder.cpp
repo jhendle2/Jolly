@@ -6,6 +6,7 @@
 
 bool isOpenScope(const std::string& keyword){
     return (
+        keyword == KW_CLASS ||
         keyword == KW_FUNCTION ||
         keyword == KW_WHILE ||
         keyword == KW_DOWHILE ||
@@ -29,10 +30,18 @@ bool isCloseScope(const std::string& keyword){
 /***************************************/
 
 ScopePtr buildScopeFromTokens(const Tokens& tokens){
+    static int id = 0;
     if(tokens.size() == 0) return nullptr;
 
     if(isOpenScope(tokens[0])){
-        std::string scope_name = tokensToLine(tokens);
+        // std::string scope_name = tokensToLine(tokens);
+        std::string scope_name = "";
+        if(tokens.size() > 1 && (tokens[0] == KW_FUNCTION || tokens[0] == KW_CLASS)){
+            scope_name = tokens[1];
+        }
+        else{
+            scope_name = tokens[0] + "_" + std::to_string(id++);
+        }
 
         enum ScopeType scope_type = stringToScopeType(tokens[0]);
         ScopePtr scope = Scope::create(scope_name, scope_type);
