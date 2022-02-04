@@ -1,8 +1,28 @@
 
-class HelloWorld
+#############################
+function TwoSetsParams
 
-    Print("Hello, World!")
+    takes Boolean s
 
-end HelloWorld
+    if s
+        takes Number n
+    else
+        takes String n
+    end if
 
-entrypoint HelloWorld
+    takes Auto d
+
+    Print("s=")
+    Println(s)
+    Print("n=")
+    Println(n)
+    Print("d=")
+    Println(d)
+
+end TwoSetsParams
+
+#############################
+
+#############################
+TwoSetsParams(True, 5, 5)
+TwoSetsParams(True, "Hello", "Hello")

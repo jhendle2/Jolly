@@ -3,6 +3,7 @@
 
 #include "keywords.hpp"
 #include "variable_type.hpp"
+#include "errors.hpp"
 
 std::unordered_map<std::string, VarType> VarTypeTable = {
     {KW_CHARACTER, VarType(KW_CHARACTER, KW_CHARACTER)},
@@ -11,6 +12,7 @@ std::unordered_map<std::string, VarType> VarTypeTable = {
     {KW_TYPE, VarType(KW_TYPE, KW_TYPE)},
     {KW_BOOLEAN, VarType(KW_BOOLEAN, KW_BOOLEAN)},
     {KW_NOTHING, VarType(KW_NOTHING, KW_NOTHING)},
+    {KW_VARIABLE, VarType(KW_VARIABLE, KW_VARIABLE)},
     {KW_OBJECT, VarType(KW_OBJECT, KW_OBJECT)},
     {KW_LIST, VarType(KW_LIST, KW_LIST)},
     {KW_MAP, VarType(KW_MAP, KW_MAP)},
@@ -63,7 +65,7 @@ VarType getVarType(std::string key){
         return VarTypeTable[key];
     }
 
-    std::cout << "!! Error: \"" << key << "\" is unknown type!\n";
+    ERROR(SyntaxErrorUnrecognizedType);
     return VarTypeTable[KW_NOTHING];
 }
 

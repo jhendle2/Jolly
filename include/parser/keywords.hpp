@@ -4,6 +4,12 @@
 
 #define KW_CLASS "class"
 #define KW_FUNCTION "function"
+#define KW_TAKES "takes"
+#define KW_YIELD "yield"
+    #define KW_YIELD_ALT "return"
+#define KW_YIELDS "yields"
+    #define KW_YIELDS_ALT "returns"
+#define KW_ENTRYPOINT "entrypoint"
 
 #define KW_WHILE "while"
 #define KW_DOWHILE "dowhile"
@@ -34,12 +40,13 @@
 #define KW_END "end"
 #define KW_EXIT "exit"
 #define KW_PASS "pass"
-#define KW_ENTRYPOINT "entrypoint"
 
 /********************************/
 
 #define KW_NOTHING "Nothing"
-    #define KW_NOTHING_ALT "None"
+    #define KW_NOTHING_ALT "Void"
+#define KW_VARIABLE "Auto"
+    #define KW_VARIABLE_ALT "Variable"
 #define KW_STRING "String"
     #define KW_STRING_ALT "Str"
 #define KW_NUMBER "Number"

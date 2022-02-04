@@ -17,6 +17,7 @@ protected:
         char character;
         std::string string;
         double number;
+        bool show_decimal;
         VarType type;
     } value;
 
@@ -33,7 +34,12 @@ public:
     void setValue(const char& value);
     void setValue(const std::string& value);
     void setValue(const double& value);
+    void setValue(const int& value);
     void setValue(const VarType& value);
+
+    void showDecimal();
+    void hideDecimal();
+    bool getShowDecimal() const;
     
     bool getBoolean() const;
     char getCharacter() const;

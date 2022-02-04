@@ -8,11 +8,14 @@
 
 #include "tokens_lines.hpp"
 #include "parser.hpp"
+#include "function_parser.hpp"
+#include "conditional_parser.hpp"
 #include "file_reader.hpp"
 #include "variable_builder.hpp"
 #include "expressions.hpp"
 #include "keywords.hpp"
 #include "logging.hpp"
+#include "operators_delimiters.hpp"
 
 #include "builtins.hpp"
 
@@ -91,20 +94,14 @@ ScopePtr buildTreeFromFile(std::string file_path){
     return master_scope;
 }
 
-void parseTreeButIgnoreFunctionsAndClasses(ScopePtr& current_scope){
-    if(current_scope->getScopeType() == ScopeFunction ||
-        current_scope->getScopeType() == ScopeClass) return;
-    parseTree(current_scope);
-}
-
 void parseTree(ScopePtr& current_scope){
 
     for(Line line : current_scope->getLines()){
-        LOGDEBUG((current_scope->getTruthiness()?"PT <True> ":"PT <False> ")+line.line);
+        LOGDEBUG(current_scope->getName()+" - "+(current_scope->getTruthiness()?"PT <True> ":"PT <False> ")+line.line);
         DEBUG_last_line = line;
 
         // Don't run scopes that shouldn't happen
-        if(current_scope->getTruthiness() == false) continue;
+        ifScopeCannotRun(current_scope) continue;
 
         // We gotta go down a scope
         if(isScopeHeader(line.line)){
@@ -120,7 +117,7 @@ void parseTree(ScopePtr& current_scope){
 }
 
 void evaluateLine(ScopePtr& current_scope, Tokens tokens){
-    LOGDEBUG("EL " + tokensToLine(tokens));
+    LOGDEBUG(current_scope->getName()+" - EL " + tokensToLine(tokens));
     
     // Runs built-in functions of the interpreter (Print, Println, Typeof, etc.)
     if(StandardJolly::isBuiltin(tokens[0])){
@@ -128,11 +125,6 @@ void evaluateLine(ScopePtr& current_scope, Tokens tokens){
         return;
     }
 
-    // First Token is a close-scope keyword
-    if(isCloseScope(tokens[0])){
-        evaluateCloseScopeLine(current_scope, tokens);
-        // No return because we want this to flow thru
-    }
     // First Token is an open-scope keyword
     if(isOpenScope(tokens[0])){
         evaluateOpenScopeLine(current_scope, tokens);
@@ -142,6 +134,7 @@ void evaluateLine(ScopePtr& current_scope, Tokens tokens){
     // Keywords (but not ones like IF, FUNCTION, WHILE, etc.)
     if(isKeyword(tokens[0])){
         evaluateKeyword(current_scope, tokens);
+        return;
     }
 
     // Variable initialization
@@ -165,80 +158,35 @@ void evaluateLine(ScopePtr& current_scope, Tokens tokens){
         Variable expression_output = evaluateExpression(current_scope, tokens);
         return;
     }
+
+    // Known function
+    if(current_scope->hasChildRecursive(tokens[0])){
+        ScopePtr function_scope = current_scope->getChildRecursive(tokens[0]);
+        Tokens shifted_tokens = shiftTokens(tokens, 1);
+
+        if(shifted_tokens.size() == 2){ // Just parenthesis
+            parseTree(function_scope);
+            emptyConditionalStack(); // We still need to clean up b/c this is still a function call
+            return;
+        }
+
+        parseFunctionCall(function_scope, shiftTokens(tokens, 1));
+        emptyConditionalStack(); // We need to clean up after a function call
+        return;
+    }
+
+    ERROR(ParseErrorUnexpectedToken);
 }
 
 void evaluateKeyword(ScopePtr& current_scope, Tokens tokens){
-    LOGDEBUG("EK " + tokensToLine(tokens));
+    LOGDEBUG(current_scope->getName()+" - EK " + tokensToLine(tokens));
     std::string keyword = tokens[0];
 
     if(keyword == KW_ENTRYPOINT){
-        if(tokens.size() < 2) ERROR(SyntaxErrorIncompleteStatement);
+        ifInvalidTokensSize(tokens, 2) ERROR(SyntaxErrorIncompleteStatement);
 
-        if(current_scope->hasChild(tokens[1])){
-            ScopePtr child = current_scope->getChild(tokens[1]);
-            parseTree(child);
-        }
+        Tokens tokens_shifted = shiftTokens(tokens, 1);
+        evaluateLine(current_scope, tokens_shifted);
         return;
     }
-}
-
-/**************************************************/
-
-static std::stack<bool> last_conditional_stack;
-
-void evaluateOpenScopeLine(ScopePtr& current_scope, Tokens tokens){
-    if(last_conditional_stack.size() > 0) LOGDEBUG(last_conditional_stack.top()?"EOSL STACK: TRUE":"EOSL STACK: FALSE");
-    
-    if(tokens[0] == KW_IF){
-        if(tokens.size() < 2){
-            ERROR(SyntaxErrorConditionalScopeWithNoCondition);
-        }
-
-        Tokens shifted_tokens = shiftTokens(tokens, 1);
-        Variable condition = evaluateExpression(current_scope, shifted_tokens);
-
-        last_conditional_stack.push(condition.getBoolean());
-        current_scope->setTruthiness(last_conditional_stack.top());
-        return;
-    }
-
-    if(tokens[0] == KW_ELSIF){
-        if(tokens.size() < 2){
-            ERROR(SyntaxErrorConditionalScopeWithNoCondition);
-        }
-
-        Tokens shifted_tokens = shiftTokens(tokens, 1);
-        Variable condition = evaluateExpression(current_scope, shifted_tokens);
-        
-        if(last_conditional_stack.size() == 0){
-            ERROR(SyntaxErrorElseWithoutIf);
-        }
-
-        last_conditional_stack.pop();
-        last_conditional_stack.push(condition.getBoolean() && !last_conditional_stack.top());
-        current_scope->setTruthiness(last_conditional_stack.top());
-        return;
-    }
-
-    if(tokens[0] == KW_ELSE){
-        if(last_conditional_stack.size() == 0){
-            ERROR(SyntaxErrorElseWithoutIf);
-        }
-
-        current_scope->setTruthiness(!last_conditional_stack.top());
-        return;
-    }
-}
-
-void evaluateCloseScopeLine(ScopePtr& current_scope, Tokens tokens){
-    LOGDEBUG(last_conditional_stack.top()?"ECSL STACK: TRUE":"EOSL STACK: FALSE");
-
-    if(tokens.size() > 1 && tokens[1] == KW_IF){
-        last_conditional_stack.pop();
-        return;
-    }
-
-    // if(tokens[0] == KW_ELSIF || tokens[0] == KW_ELSE){
-    //     return;
-    // }
 }

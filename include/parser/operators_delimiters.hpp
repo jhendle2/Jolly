@@ -75,6 +75,7 @@
     // #define OP_MINUSMINUS "and="
     #define OP_EQ "="
     #define OP_COLON ":"
+    #define OP_COMMA ","
     #define OP_SEMICOLON ";"
     #define OP_CAT "~"
     #define OP_DOT "~"

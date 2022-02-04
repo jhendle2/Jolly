@@ -9,7 +9,7 @@ build:
 
 test:
 	make build
-	./jolly --debug ./examples/test2.jolly
+	./jolly --debug ./examples/test4.jolly
 
 t:
 	g++ -g -Wall -o test test.cpp

@@ -25,7 +25,9 @@
 #define SyntaxErrorReinitializedVariable SyntaxError("Reinitialized Variable", "Variable was reinitialized twice!")
 #define SyntaxErrorConditionalScopeWithNoCondition SyntaxError("Conditional Scope Lacking Condition", "This conditional scope lacks any sort of boolean value")
 #define SyntaxErrorElseWithoutIf SyntaxError("Else without If or Elsif", "This else lacks a friend :(")
+#define SyntaxErrorElsifWithoutIf SyntaxError("Elsif without If or Elsif", "This elsif lacks a friend :(")
 #define SyntaxErrorBadName SyntaxError("Bad Name", "This name is not applicable for the given object")
+#define SyntaxErrorIncompleteFunctionCall SyntaxError("Incomplete Function Call", "Missing parenthesis for function call")
 
 /* Syntax Warnings */
 #define SyntaxWarningUnknownVariable BaseWarning("Unknown Variable", "This variable is unknown and will be initialized to Nothing")
@@ -47,6 +49,9 @@
 #define ParseErrorScopeDoesNotExist ParseError("Critical Scope Error", "Attempted an operation with a scope that does not exist")
 #define ParseErrorScopeNotFunction ParseError("Scope Not a Function", "Attempted to perform functional operations on a non-function scope")
 #define ParseErrorMissingParameter ParseError("Missing Parameter", "Parameter at this index does not exist")
+#define ParseErrorExcessParameters ParseError("Excess Parameters", "Too many parameters for given function")
+#define ParseErrorInvalidEntrypoint ParseError("Invalid Entrypoint", "Entrypoint must be a known function or class")
+#define ParseErrorTakesOutsideFunction ParseError("Takes Outside Function", "Takes keyword is invalid outside function declaration")
 
 #define RECURSIONDEPTHLIMIT 100
 #define ParseErrorRecursionLimitReached ParseError("Recursion Limit Reached", "Recursion depth has reached its max of 100")
@@ -72,6 +77,6 @@
 #include "debug.hpp"
 #include "file_reader.hpp"
 // #define ERROR(X) { delete DEBUG_last_scope; std::cout<<X<<lineToString(DEBUG_last_line)<<"\n\n"; exit(EXIT_FAILURE);}
-#define ERROR(X) { std::cout<<X<<lineToString(DEBUG_last_line)<<"\n\n"; exit(EXIT_FAILURE);}
+#define ERROR(X) { std::cout<<"\n"<<X<<lineToString(DEBUG_last_line)<<"\n\n"; exit(EXIT_FAILURE);}
 // #include "scope.hpp"
 // void cleanup_everything(Scope* scope);

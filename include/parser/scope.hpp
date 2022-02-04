@@ -10,10 +10,12 @@
 
 enum ScopeType{
     ScopeInvalid,
+    ScopeGeneric,
 
     ScopeConstant,
     ScopeClass,
     ScopeFunction,
+    ScopeFunctionAlreadyProcessed,
 
     ScopeWhile,
     ScopeDowhile,
@@ -58,6 +60,7 @@ public:
     [[nodiscard]] static std::shared_ptr<Scope> create(std::string name, enum ScopeType type);
 
     std::string getName() const;
+    void setScopeType(enum ScopeType type);
     enum ScopeType getScopeType() const;
 
     bool getTruthiness() const;
@@ -78,18 +81,24 @@ public:
 
     void addChild(std::shared_ptr<Scope> child);
     bool hasChild(std::string name);
+    bool hasChildRecursive(std::string name);
     std::shared_ptr<Scope> getChild(std::string name);
+    std::shared_ptr<Scope> getChildRecursive(std::string name);
 
     bool hasVariable(std::string name) const;
     void addVariable(std::string name, Variable var);
     void addVariable(Variable var);
     void updateVariable(std::string name, const Variable& right);
-    void updateVariableRecursive(const Variable& right);
     Variable getVariable(const std::string name);
 
     bool hasVariableRecursive(std::string name) const;
+    void updateVariableRecursive(const Variable& right);
     void updateVariableRecursive(std::string name, const Variable& right);
     Variable getVariableRecursive(const std::string name);
 };
 
 typedef std::shared_ptr<Scope> ScopePtr;
+
+#define ProcessFunction(X) X->setScopeType(ScopeFunctionAlreadyProcessed)
+#define DeprocessFunction(X) X->setScopeType(ScopeFunction)
+#define isFunctionScope(X) (X->getScopeType()==ScopeFunctionAlreadyProcessed || X->getScopeType()==ScopeFunction)

@@ -12,6 +12,7 @@ Variable::Variable(){
     value.string = "";
     value.number = 0.0;
     value.type = VarType();
+    value.show_decimal = false;
 
     parent = nullptr;
 }
@@ -25,6 +26,7 @@ Variable::Variable(bool boolean){
     value.string = "";
     value.number = 0.0;
     value.type = VarType();
+    value.show_decimal = false;
 
     parent = nullptr;
 }
@@ -38,6 +40,7 @@ Variable::Variable(std::string name, std::string type){
     value.string = "";
     value.number = 0.0;
     value.type = VarType();
+    value.show_decimal = false;
 
     parent = nullptr;
 }
@@ -51,6 +54,7 @@ Variable::Variable(std::string name, VarType type){
     value.string = "";
     value.number = 0.0;
     value.type = VarType();
+    value.show_decimal = false;
 
     parent = nullptr;
 }
@@ -58,8 +62,13 @@ Variable::Variable(std::string name, VarType type){
 void Variable::setValue(const bool& value){this->type = getVarType(KW_BOOLEAN); this->value.boolean=value;}
 void Variable::setValue(const char& value){this->type = getVarType(KW_CHARACTER); this->value.character=value;}
 void Variable::setValue(const std::string& value){this->type = getVarType(KW_STRING); this->value.string=value;}
-void Variable::setValue(const double& value){this->type = getVarType(KW_NUMBER); this->value.number=value;}
+void Variable::setValue(const double& value){this->type = getVarType(KW_NUMBER); this->value.show_decimal=true; this->value.number=value;}
+void Variable::setValue(const int& value){this->type = getVarType(KW_NUMBER); this->value.show_decimal=false; this->value.number=value;}
 void Variable::setValue(const VarType& value){this->type = getVarType(KW_TYPE); this->value.type=value;}
+
+void Variable::showDecimal(){this->value.show_decimal=true;}
+void Variable::hideDecimal(){this->value.show_decimal=false;}
+bool Variable::getShowDecimal() const{return this->value.show_decimal;}
 
 void Variable::setName(std::string name){this->name=name;}
 std::string Variable::getName() const{return name;}
@@ -74,7 +83,11 @@ std::shared_ptr<Scope> Variable::getParent() const{return parent;}
 std::string Variable::valueString() const{
     if(type.getName()=="String") return value.string;
     if(type.getName()=="Character") return std::to_string(value.character);
-    if(type.getName()=="Number") return std::to_string(value.number);
+    if(type.getName()=="Number"){
+        int value_integer = (int)value.number;
+        if(value.show_decimal) return std::to_string(value.number);
+        else return std::to_string(value_integer);
+    }
     if(type.getName()=="Boolean") return value.boolean?"True":"False";
     if(type.getName()=="Type") return value.type.getName();
     return "";
@@ -109,6 +122,7 @@ void Variable::_set(const Variable& right){
     value.string = right.getString();
     value.number = right.getNumber();
     value.type = right.getValueType();
+    value.show_decimal = right.getShowDecimal();
 
     parent = right.getParent();
 }

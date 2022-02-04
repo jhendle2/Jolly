@@ -4,12 +4,14 @@
 #include "keywords.hpp"
 #include "scope.hpp"
 #include "logging.hpp"
+#include "errors.hpp"
 
 std::string scopeTypeToString(const enum ScopeType& type){
     switch(type){
         case ScopeConstant: return "constant";
         case ScopeClass: return "class";
         case ScopeFunction: return "function";
+        case ScopeFunctionAlreadyProcessed: return "function(already_processed)";
         case ScopeWhile: return "while";
         case ScopeDowhile: return "dowhile";
         case ScopeFor: return "for";
@@ -82,6 +84,7 @@ std::vector<Line> Scope::getLines() const{return this->lines;}
 ScopePtr Scope::getptr(){return shared_from_this();}
 
 std::string Scope::getName() const{return this->name;}
+void Scope::setScopeType(enum ScopeType type){this->type = type;}
 enum ScopeType Scope::getScopeType() const{return this->type;}
 
 bool Scope::getTruthiness() const{return truthiness;}
@@ -119,11 +122,34 @@ std::shared_ptr<Scope> Scope::getChild(std::string name){
     return nullptr;
 }
 
+bool Scope::hasChildRecursive(std::string name){
+    if(hasChild(name)){
+        return true;
+    }
+    
+    if(parent != nullptr){
+        return parent->hasChildRecursive(name);
+    }
+    return false;
+}
+
+std::shared_ptr<Scope> Scope::getChildRecursive(std::string name){
+
+    if(hasChild(name)){
+        return getChild(name);
+    }
+    if(hasChildRecursive(name)){
+        return parent->getChildRecursive(name);
+    }
+
+    return nullptr;
+}
+
 bool Scope::hasVariable(std::string name) const{
     return (variables.count(name) > 0);
 }
 void Scope::addVariable(std::string name, Variable var){
-    if(LOGLEVEL == LOGLEVELDEBUG) std::cout<<"Adding variable: "<<name<<"\n";
+    if(LOGLEVEL == LOGLEVELDEBUG) std::cout<<"("<<this->name<<") Adding variable: "<<name<<"\n";
     if(hasVariable(name)){
         updateVariable(name, var);
         return;
@@ -135,18 +161,23 @@ void Scope::addVariable(Variable var){
     addVariable(var.getName(), var);
 }
 void Scope::updateVariable(std::string name, const Variable& right){
+    LOGDEBUG("Update Var");
     if(!hasVariable(name)){
+        LOGDEBUG("Has Var");
         addVariable(right);
         return;
     }
 
+    LOGDEBUG("Set Var");
     variables[name]._set(right);
+    LOGDEBUG("Setted Var");
+    if(LOGLEVEL == LOGLEVELDEBUG) std::cout<<"("<<this->name<<") Updating variable: "<<name<<", now = "<<variables[name].dump()<<"\n";
 }
 Variable Scope::getVariable(const std::string name){
     if(hasVariable(name)){
         return variables[name];
     }
-    std::cout<<"!! Error: Variable \"" << name << "\" doesn\'t exist in scope \"" << this->getName() << "\"\n";
+    ERROR(ParseErrorUnrecognizedVariable);
     return Variable();
 }
 
@@ -182,6 +213,7 @@ void Scope::updateVariableRecursive(const Variable& right){
     this->updateVariableRecursive(right.getName(), right);
 }
 Variable Scope::getVariableRecursive(const std::string name){
+    if(LOGLEVEL == LOGLEVELDEBUG) std::cout<<"("<<this->name<<") Getting variable: "<<name<<", now = "<<variables[name].dump()<<"\n";
     if(hasVariable(name)){
         return getVariable(name);
     }

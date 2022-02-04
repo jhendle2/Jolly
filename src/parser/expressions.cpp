@@ -7,6 +7,8 @@
 #include "keywords.hpp"
 #include "operators_delimiters.hpp"
 #include "logging.hpp"
+#include "function_parser.hpp"
+#include "errors.hpp"
 
 Variable applyOp(ScopePtr& current_scope, Variable left, std::string op, const Variable& right){
     if(op == OP_EQ){
@@ -38,14 +40,14 @@ Variable evaluateExpression(ScopePtr& current_scope, Tokens tokens){
 
         else if(VarUtils::isNumber(tokens[i])){
             Variable var("constant", KW_NUMBER);
-            double value = (double)atoi(tokens[i].c_str());
+            int value = atoi(tokens[i].c_str());
             var.setValue(value);
             values.push(var);
         }
 
         else if(VarUtils::isDecimal(tokens[i])){
             Variable var("constant", KW_NUMBER);
-            double value = (double)atoi(tokens[i].c_str());
+            double value = (double)atof(tokens[i].c_str());
             var.setValue(value);
             values.push(var);
         }
@@ -125,8 +127,33 @@ Variable evaluateExpression(ScopePtr& current_scope, Tokens tokens){
                 if(current_scope->hasVariableRecursive(tokens[i])){
                     looked_up_variable = current_scope->getVariableRecursive(tokens[i]);
                 }
+                else if(current_scope->hasChildRecursive(tokens[i])){
+                    static int STOP = 0;
+                    std::cout<<"STOP = "<<STOP<<"\n";
+                    if(STOP++==3) ERROR(ParseErrorCriticalScopeError);
+
+                    Tokens function_tokens;
+                    size_t j = 0;
+                    int paren_depth = 0;
+                    for(j = i+1; j<tokens.size(); j++){
+                        std::cout<<"j = "<<j<<"\n";
+                        function_tokens.push_back(tokens[j]);
+                        std::cout<<"pushing = "<<tokens[j]<<"\n";
+                        if(tokens[j] == OP_PAREN_OPEN){ // Allows us to have Func1(Func2(X), Func3(Y))
+                            paren_depth++;
+                        }
+                        if(tokens[j] == OP_PAREN_CLOSE){
+                            paren_depth--;
+                            if(paren_depth < 1) break;
+                        }
+                    }
+                    i = j;
+                    std::cout<<"i = "<<i<<"\n";
+                    LOGDEBUG("Function_tokens=" + tokensToLine(function_tokens));
+                    looked_up_variable = parseFunctionCall(current_scope, function_tokens);
+                }
                 else{
-                    std::cout << "!! Error: " << tokens[i] << " not a known variable!\n";
+                    ERROR(SyntaxErrorUnrecognizedObject);
                 }
                 values.push(looked_up_variable);
 

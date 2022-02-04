@@ -15,17 +15,12 @@ bool VarUtils::isNumber(const std::string& token){
 }
 
 bool VarUtils::isDecimal(const std::string& token){
-    int dot_counter = 0;
-    for(size_t i = 0; i<token.length(); i++){
-        if(token.at(i) == '.'){
-            dot_counter++;
-            continue;
-        }
-        if(!isDigit(token.at(i))) return false;
+    int dot_count = 0;
+    for(const char& c : token){
+        if(c == '.') dot_count++;
+        else if(!isDigit(c)) return false;
     }
-
-    if(dot_counter <= 1) return true;
-    return false;
+    return (dot_count <= 1);
 }
 
 bool VarUtils::isCharacter(const std::string& token){
@@ -71,9 +66,7 @@ std::string VarUtils::dropDoubleQuotes(const std::string& token){
 bool VarUtils::stringToBool(const std::string& token){
     return (
         token == KW_TRUE ||
-        token == KW_TRUE_ALT ||
-        token == KW_FALSE ||
-        token == KW_FALSE_ALT
+        token == KW_TRUE_ALT
     );
 }
 
